@@ -31,11 +31,11 @@ const util = require('util');
  * fileWriter property (instance of FileWriter) on the parameters
  * object to control where the generated code is written to disk.
  *
- * @private
  * @class
  * @memberof module:composer-common
  */
 class HTMLFormVisitor {
+
     /**
      * Visitor design pattern
      * @param {Object} thing - the object being visited
@@ -88,10 +88,6 @@ class HTMLFormVisitor {
         modelFile.getAllDeclarations().forEach((decl) => {
             decl.accept(this, parameters);
         });
-
-        // parameters.fileWriter.writeLine(0, '// }');
-        // parameters.fileWriter.closeFile();
-
         return null;
     }
 
@@ -130,7 +126,7 @@ class HTMLFormVisitor {
         !classDeclaration.isAbstract()) {
             const id = classDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
             const form = `<h4>${classDeclaration.getName()}</h4>
-            <form name="${classDeclaration.getName()}" id="form-${id}">`;
+            <div name="${classDeclaration.getName()}" id="form-${id}">`;
 
             parameters.fileWriter.writeLine(0, form );
 
@@ -138,7 +134,7 @@ class HTMLFormVisitor {
                 property.accept(this,parameters);
             });
 
-            parameters.fileWriter.writeLine(0, '</form>' );
+            parameters.fileWriter.writeLine(0, '</div>' );
         }
         return null;
     }
@@ -154,19 +150,22 @@ class HTMLFormVisitor {
         const styles = parameters.customClasses;
         const div = `<div class="${styles.field}">`;
         const label = `<label for="${field.getName()}">${field.getName()}:</label>`;
+        parameters.fileWriter.writeLine(1, div);
+        parameters.fileWriter.writeLine(2, label);
+
         let formField;
         if (field.isPrimitive()) {
             formField = `<input type="${this.toFieldType(field.getType())}" class="${styles.input}" id="${field.getName()}">`;
+            parameters.fileWriter.writeLine(2, formField);
+        } else {
+            parameters.fileWriter.writeLine(2, '<fieldset class="form-group">');
 
+            let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            type.accept(this, parameters);
+
+            parameters.fileWriter.writeLine(2, '</fieldset>');
         }
-        if (!field.isPrimitive()) {
-            const id = field.getType().toLowerCase();
-            const url = '#form-'+ id + '-' + parameters.timestamp;
-            formField = `<a href="${url}">${field.getName()}</a>`;
-        }
-        parameters.fileWriter.writeLine(1, div);
-        parameters.fileWriter.writeLine(2, label);
-        parameters.fileWriter.writeLine(2, formField);
+
         parameters.fileWriter.writeLine(1, '</div>' );
 
         return null;
@@ -233,4 +232,4 @@ class HTMLFormVisitor {
     }
 }
 
-module.exports.HTMLFormVisitor = HTMLFormVisitor;
+module.exports = HTMLFormVisitor;

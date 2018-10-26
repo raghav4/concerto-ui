@@ -17,7 +17,7 @@ const axios = require('axios');
 const fs = require('fs');
 const ModelManager = require('composer-concerto').ModelManager;
 const Writer = require('composer-concerto').Writer;
-const {HTMLFormVisitor} = require('./htmlformvisitor');
+const HTMLFormVisitor = require('./htmlformvisitor');
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
 * and assets.
@@ -102,40 +102,6 @@ class FormGenerator {
 
     /**
     * The typescript code generator
-    * @return {String} the generated HTML string
-    */
-    async generateHTML () {
-        const {model, modelManager, options} = this;
-        modelManager.clearModelFiles();
-
-        modelManager.addModelFile(model, undefined, true);
-        modelManager.updateExternalModels();
-        const modelFiles = modelManager.getModelFiles();
-
-
-        let visitor = new HTMLFormVisitor ();
-        const param = {
-            fileWriter: new Writer(),
-            customClasses: options.customClasses,
-            timestamp: Date.now()
-
-        };
-        let result = '';
-        let res = {};
-        await modelFiles.forEach((file) => {
-            console.log(file);
-            modelManager.modelFile = file;
-            modelManager.accept(visitor, param);
-            const text = param.fileWriter.getBuffer();
-            result += `\n${text}`;
-            res[file.namespace] = text;
-
-        });
-        return result;
-    }
-
-    /**
-    * The typescript code generator
     * @private
     * @param {Object} model - The business network model text
     * @param {Object} options - form options
@@ -145,29 +111,27 @@ class FormGenerator {
         let modelManager = new ModelManager();
         modelManager.clearModelFiles();
 
-        modelManager.addModelFile(model, undefined, true);
-        modelManager.updateExternalModels();
-        const modelFiles = modelManager.getModelFiles();
+        const modelFile = modelManager.addModelFile(model, undefined, true);
+        await modelManager.updateExternalModels();
 
-
-        let visitor = new HTMLFormVisitor ();
-        const param = {
-            fileWriter: new Writer(),
+        const params = {
             customClasses: options.customClasses,
-            timestamp: Date.now()
-
+            timestamp: Date.now(),
+            modelManager,
+            fileWriter: new Writer(),
         };
-        let result = '';
-        let res = {};
-        await modelFiles.forEach((file) => {
-            modelManager.modelFile = file;
-            modelManager.accept(visitor, param);
-            const text = param.fileWriter.getBuffer();
-            result += `\n${text}`;
-            res[file.namespace] = text;
 
-        });
-        return result;
+        if(!options.visitor){
+            options.visitor = new HTMLFormVisitor ();
+        }
+
+        return modelFile.accept(options.visitor , params);
+
+        /*
+        let result = '<form>';
+        const text = parameters.fileWriter.getBuffer();
+        result += `${text}
+        </form>`;*/
     }
 
 }

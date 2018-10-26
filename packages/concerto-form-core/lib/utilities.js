@@ -11,16 +11,25 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-
 'use strict';
 
 /**
- * Hyperledger-Composer module. Hyperledger-Composer is a framework for creating
- * blockchain backed digital networks and exchanging assets between participants
- * via processing transactions.
- * @module composer-form
+ *
  */
+class Utilities {
 
-module.exports.FormGenerator = require('./lib/formgenerator.js');
-module.exports.HTMLFormVisitor = require('./lib/htmlformvisitor.js');
-module.exports.Utilities = require('./lib/utilities.js');
+    /**
+     * Inserts correct spacing and capitalization to a camelCase label
+     * @param {string} labelName - the label text to be transformed
+     * @returns {string} - The label text formatted for rendering
+     */
+    static normalizeLabel(labelName){
+        return labelName
+        .replace(/([a-z])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([a-z])/g, ' $1$2')
+        .replace(/\ +/g, ' ')
+        .replace(/^./, function(str){ return str.toUpperCase(); });
+    }
+}
+
+module.exports = Utilities;

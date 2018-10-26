@@ -15,19 +15,66 @@
 import React, { Component } from 'react';
 import './App.css';
 import {FormGenerator} from 'concerto-form-core'
+import {ReactFormVisitor} from 'concerto-form-react'
 import {Tabs, Tab} from 'react-bootstrap-tabs'
 
 const options = {
     customClasses : {
-        field: 'form-group',
-        input: 'form-control',
-        label: 'control-label'
-    }
+        field: 'field',
+        declaration: 'field',
+        declarationHeader: 'ui dividing header',
+        enumeration: 'ui fluid dropdown',
+        required: 'required'
+    },
+    visitor: new ReactFormVisitor(),
 };
 
 class App extends Component {
   state = {
-    form: null
+    form: null,
+    modelFile: `namespace org.accordproject.finance.bond
+
+    import org.accordproject.organization.Organization from https://models.accordproject.org/organization.cto
+    import org.accordproject.time.Duration from https://models.accordproject.org/time.cto
+    import org.accordproject.money.CurrencyCode from https://models.accordproject.org/money.cto
+    
+    enum CouponType {
+      o FIXED
+      o FLOATING
+    }
+    
+    concept PaymentFrequency {
+        o Integer periodMultiplier
+        o Duration period
+    }
+    
+    /**
+     * Definition of a Bond, based on the FpML schema:
+     * http://www.fpml.org/spec/fpml-5-3-2-wd-2/html/reporting/schemaDocumentation/schemas/fpml-asset-5-3_xsd/elements/bond.html
+     *
+     */
+    concept Bond {
+        o String[] instrumentId
+        o String description optional
+        o CurrencyCode currency optional
+        o String[] exchangeId
+        o String clearanceSystem optional
+        o String definition optional
+        o String seniority optional
+        o CouponType couponType optional
+        o Double couponRate optional
+        o DateTime maturity
+        o Double parValue
+        o Double faceAmount
+        o PaymentFrequency paymentFrequency
+        o String dayCountFraction
+        --> Organization issuer
+    }
+    
+    asset BondAsset identified by ISINCode {
+        o String ISINCode
+        o Bond bond
+    }`
   }
 
   componentDidMount () {
@@ -75,7 +122,7 @@ class App extends Component {
           <br></br>
               
               <Tabs
-                headerStyle={{background:'#efefef'}} activeHeaderStyle={{background: 'white', 'border-top':'2px solid blue'}}
+                headerStyle={{background:'#efefef'}} activeHeaderStyle={{background: 'white', 'borderTop':'2px solid blue'}}
               >
                 <Tab  
                   label="Paste model file"
@@ -124,8 +171,9 @@ class App extends Component {
               </Tabs>
               <hr></hr>
               <h2>Form</h2>
-              <div dangerouslySetInnerHTML={{ __html: form }}> 
-              </div>
+              <form className="ui form">
+              {form}
+              </form>
             </div>
         </div>
       </div>

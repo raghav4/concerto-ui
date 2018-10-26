@@ -18,9 +18,7 @@
  * Hyperledger-Composer module. Hyperledger-Composer is a framework for creating
  * blockchain backed digital networks and exchanging assets between participants
  * via processing transactions.
- * @module composer-form
+ * @module concerto-form-react
  */
 
-module.exports.FormGenerator = require('./lib/formgenerator.js');
-module.exports.HTMLFormVisitor = require('./lib/htmlformvisitor.js');
-module.exports.Utilities = require('./lib/utilities.js');
+module.exports.ReactFormVisitor = require('./lib/reactformvisitor.js');
