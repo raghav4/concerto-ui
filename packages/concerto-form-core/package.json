@@ -106,10 +106,7 @@
       "test/**"
     ],
     "reporter": [
-      "text-lcov",
       "lcov",
-      "text-summary",
-      "html",
       "json",
       "text"
     ],

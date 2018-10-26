@@ -35,37 +35,6 @@ const {Utilities, HTMLFormVisitor} = require('concerto-form-core');
  * @memberof module:composer-common
  */
 class ReactFormVisitor extends HTMLFormVisitor {
-    
-  /**
-   * Visitor design pattern
-   * @param {ModelManager} modelManager - the object being visited
-   * @param {Object} parameters  - the parameter
-   * @return {Object} the result of visiting or null
-   * @private
-   */
-  visitModelManager(modelManager, parameters) {
-    return modelManager.getModelFiles().map(modelFile => {
-        return modelFile.accept(this, parameters);
-      });
-  }
-
-  /**
-   * Visitor design pattern
-   * @param {ModelFile} modelFile - the object being visited
-   * @param {Object} parameters  - the parameter
-   * @return {Object} the result of visiting or null
-   * @private
-   */
-  visitModelFile(modelFile, parameters) {
-    const styles = parameters.customClasses;
-    return modelFile.getAllDeclarations().map((decl) => {
-        return (<div key={decl.getName()} className={styles.declaration}>
-          <div className={styles.declarationHeader}>{Utilities.normalizeLabel(decl.getName())}</div>
-          {decl.accept(this, parameters)}
-        </div>);
-    });
-  }
-    
     /**
      * Visitor design pattern
      * @param {EnumDeclaration} enumDeclaration - the object being visited
@@ -84,7 +53,6 @@ class ReactFormVisitor extends HTMLFormVisitor {
           })}
           </select>
         </div>);
-        return null;
     }
 
     /**
@@ -95,14 +63,15 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters) {
+        const styles = parameters.customClasses;
         if(!classDeclaration.isSystemType() &&
         !classDeclaration.isAbstract()) {
             const id = classDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
             return (
               <fieldset key={id}>
-                <legend>{Utilities.normalizeLabel(classDeclaration.getName())}</legend>
+                <h4 className={styles.declarationHeader}>{Utilities.normalizeLabel(classDeclaration.getName())}</h4>
                 <div name={classDeclaration.getName()}>
-
+                
                 {classDeclaration.getOwnProperties().map((property) => {
                     return property.accept(this,parameters);
                 })}
@@ -122,22 +91,40 @@ class ReactFormVisitor extends HTMLFormVisitor {
      */
     visitField(field, parameters) {
         const styles = parameters.customClasses;
-        let formField;
-        if (field.isPrimitive()) {
-            formField = <input type={this.toFieldType(field.getType())} className={styles.input} id={field.getName()}/>
-        } else {
-            let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
-            formField = type.accept(this, parameters);
-        }
-
         let style = styles.field;
         if(!field.isOptional()){
           style += ' ' + styles.required;
         }
-        return (<div className={style} id={field.getName()}>
-          <label>{Utilities.normalizeLabel(field.getName())}:</label>
-          {formField}
-        </div>);
+
+        if (field.isArray()) {
+            return (<div className={style} key={field.getName()}>
+                <label>{Utilities.normalizeLabel(field.getName())}</label>
+                <textarea rows='4'/>                
+            </div>);
+        }
+
+        if (field.isPrimitive()) {
+            if(field.getType() === 'Boolean'){
+                return (<div className={styles.field} key={field.getName()}>
+                    <label>{Utilities.normalizeLabel(field.getName())}</label>
+                    <div className={styles.boolean}>
+                        <input type="checkbox"/>
+                        <label/>
+                    </div>
+                </div>);
+            }
+            return (<div className={style} key={field.getName()}>
+                <label>{Utilities.normalizeLabel(field.getName())}</label>
+                <input type={this.toFieldType(field.getType())} className={styles.input} id={field.getName()}/>                
+            </div>);
+        } else {
+            let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            return (<div className={style} key={field.getName()}>
+                {type.accept(this, parameters)}
+            </div>);
+        }
+
+        
     }
 
     /**
@@ -148,7 +135,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitEnumValueDeclaration(enumValueDeclaration, parameters) {
-        return <option key={enumValueDeclaration.getName()} value={enumValueDeclaration.getName()}>{Utilities.normalizeLabel(enumValueDeclaration.getName())}</option>
+        return <option key={enumValueDeclaration.getName()} value={enumValueDeclaration.getName()}>{enumValueDeclaration.getName()}</option>
     }
 
     /**
@@ -159,19 +146,26 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitRelationship(relationship, parameters) {
-        // const styles = parameters.customClasses;
-        // const div = `<div className="${''}">`;
-        // const label = `<label for="${relationship.getName()}">${relationship.getName()}:</label>`;
-        // let formField = `<input type="${this.toFieldType(relationship.getType())}" className='${styles.input}' id="${relationship.getName()}">`;
+        const styles = parameters.customClasses;
+        let fieldStyle = styles.field;
+        if(!relationship.isOptional()){
+            fieldStyle += ' ' + styles.required;
+        }
+        return (<div className={fieldStyle} key={relationship.getName()}>
+            <label>{Utilities.normalizeLabel(relationship.getName())}</label>
+            <input type='text' className={styles.input} id={relationship.getName()} />
+        </div>);
 
-
-        // parameters.fileWriter.writeLine(1, div);
-        // parameters.fileWriter.writeLine(2, label);
-        // parameters.fileWriter.writeLine(2, formField);
-        // parameters.fileWriter.writeLine(1, '</div>' );
-
-        return null;
     }
+
+    /**
+     * @param {object} result - the result of the visitor
+     * @param {object} parameters - the visitor parameters
+     * @returns {object} - a HTML string
+     */
+    wrapHtmlForm(result, parameters) {
+      return (<form>{parameters.fileWriter.getBuffer()}</form>);
+  }
 }
 
 module.exports = ReactFormVisitor;

@@ -24,13 +24,17 @@ const options = {
         declaration: 'field',
         declarationHeader: 'ui dividing header',
         enumeration: 'ui fluid dropdown',
-        required: 'required'
+        required: 'required',
+        boolean: 'ui toggle checkbox'
     },
     visitor: new ReactFormVisitor(),
 };
 
+const generator = new FormGenerator(options);
+
 class App extends Component {
   state = {
+    types: [],
     form: null,
     modelFile: `namespace org.accordproject.finance.bond
 
@@ -55,6 +59,7 @@ class App extends Component {
      */
     concept Bond {
         o String[] instrumentId
+        o Boolean isIssued
         o String description optional
         o CurrencyCode currency optional
         o String[] exchangeId
@@ -80,20 +85,27 @@ class App extends Component {
   componentDidMount () {
   }
 
-  async form (file, options, type) {
-    let form;
+  async loadModel (file, type) {
     if  (type === 'text') {
-      form = await FormGenerator.fromText(file, options);
+      await generator.loadFromText(file);
     } else if (type === 'url') {
-      form = await FormGenerator.fromUrl(file, options);
+      await generator.loadFromUrl(file);
     }
+    console.log('loaded model');
+    this.setState({types: generator.getTypes()})
+  }
+
+  async handleDeclarationSelectionChange(event) {
+    const form = generator.generateHTML(event.target.value);
     this.setState({
-      form
+      form, 
+      types: generator.getTypes(),
     })
+    event.preventDefault();
   }
 
   async handleTextAreaSubmit(event) {
-    this.form(this.state.modelFile, options, 'text')
+    this.loadModel(this.state.modelFile, 'text')
     event.preventDefault();
   }
   
@@ -102,7 +114,7 @@ class App extends Component {
   }
 
   async handleUrlSubmit(event) {
-    this.form(this.state.modelUrl, options, 'url')
+    this.loadModel(this.state.modelUrl, 'url')
     event.preventDefault();
   }
   
@@ -138,7 +150,7 @@ class App extends Component {
                       <br></br>
                       <input 
                         type="submit" 
-                        value="Submit" 
+                        value="Load Model" 
                         className={customClasses.button || 'btn btn-primary'}/>
                     </div>
                   </form>
@@ -157,7 +169,7 @@ class App extends Component {
                       <br></br>
                       <input 
                         type="submit" 
-                        value="Submit" 
+                        value="Load Model"
                         className={customClasses.button || 'btn btn-primary'}/>
                     </div>
                   </form>
@@ -169,6 +181,16 @@ class App extends Component {
                   Currently disabled
                 </Tab>
               </Tabs>
+              <div className='field'>
+                <label>Declaration Selection</label>
+                <select className='ui fluid dropdown' 
+                  onChange={this.handleDeclarationSelectionChange.bind(this)}
+                  value={this.state.type}>
+                  {this.state.types.map((type)=>{
+                    return <option key={type.getFullyQualifiedName()} value={type.getFullyQualifiedName()}>{type.getFullyQualifiedName()}</option>
+                  })}
+                </select>
+              </div>              
               <hr></hr>
               <h2>Form</h2>
               <form className="ui form">

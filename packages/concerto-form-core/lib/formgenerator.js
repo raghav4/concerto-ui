@@ -16,7 +16,6 @@
 const axios = require('axios');
 const fs = require('fs');
 const ModelManager = require('composer-concerto').ModelManager;
-const Writer = require('composer-concerto').Writer;
 const HTMLFormVisitor = require('./htmlformvisitor');
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
@@ -29,56 +28,42 @@ class FormGenerator {
     /**
     * Create the FormGenerator.
     *
-    * @param {String} modelFileContent - the name (path) of the .cto file or a string of the model
-    * @param {Object} options - form options
-    * @private
+    * @param {object} options - form options
+    * @param {object} options.visitor - a class that extends HTMLFormVisitor that generates HTML, defaults to HTMLFormVisitor
+    * @param {object} options.customClasses - a custom CSS classes that can be applied to generated HTML
+    * @param {boolean} options.wrapHtmlForm - if true, the result will be wrapped in a <form> tag
     */
-    constructor(modelFileContent, options) {
+    constructor(options) {
         this.modelManager = new ModelManager();
-        this.model = modelFileContent;
         this.options = options;
-        this.modelFile = null;
     }
 
     /**
-    * Visitor design pattern
-    * @param {Object} visitor - the visitor
-    * @param {Object} parameters  - the parameter
-    * @return {Object} the result of visiting or null
-    * @private
-    */
-    accept(visitor, parameters) {
-        return visitor.visit(this.modelFile, parameters);
-    }
-
-    /**
-    * Create a template from an URL.
+    * Load a model from a file.
     * @param {String} path  - the path to a file
-    * @param {object} options - additional options
-    * @return {String} a composer business network file
     */
-    static async fromFile(path, options) {
+    async loadFromFile(path) {
+        this.modelManager.clearModelFiles();
         const model = await fs.readFileSync(path, 'utf8');
-        return FormGenerator.generateHTML(model, options);
+        this.modelManager.addModelFile(model, undefined, true);
+        await this.modelManager.updateExternalModels();
     }
 
     /**
-    * Create a template from an URL.
+    * Load a model from text.
     * @param {String} text  - the model
-    * @param {object} options - additional options
-    * @return {String} a composer business network file
     */
-    static async fromText(text, options) {
-        return FormGenerator.generateHTML(text, options);
+    async loadFromText(text) {
+        this.modelManager.clearModelFiles();
+        this.modelManager.addModelFile(text, undefined, true);
+        await this.modelManager.updateExternalModels();
     }
 
     /**
-    * Create a template from an URL.
+    * Load a model from an URL.
     * @param {String} url  - the URL to a zip or cto archive
-    * @param {object} options - additional options
-    * @return {Promise} a Promise to the instantiated business network
     */
-    static async fromUrl(url, options) {
+    async loadFromUrl(url) {
         const request = {};
         request.url = url;
         request.method = 'get';
@@ -88,7 +73,9 @@ class FormGenerator {
         try {
             const response = await axios(request);
             let text = await response.data.toString('utf8');
-            return this.generateHTML(text, options);
+            this.modelManager.clearModelFiles();
+            this.modelManager.addModelFile(text, undefined, true);
+            await this.modelManager.updateExternalModels();
         } catch (error) {
             if (error.response) {
                 throw new Error('Request to URL ['+ url +'] returned with error code: ' + error.response.status);
@@ -101,37 +88,42 @@ class FormGenerator {
     }
 
     /**
-    * The typescript code generator
-    * @private
-    * @param {Object} model - The business network model text
-    * @param {Object} options - form options
+     * @returns {array} A list of types stored in the model manager
+     */
+    getTypes(){
+        return this.modelManager.getModelFiles()
+            .reduce((classDeclarations, modelFile) => {
+                return classDeclarations.concat(modelFile.getAllDeclarations());
+            }, []);
+    }
+
+    /**
+    * @param {Object} type - The type from the model source to generate a form for
     * @return {String} the generated HTML string
     */
-    static async generateHTML (model, options) {
-        let modelManager = new ModelManager();
-        modelManager.clearModelFiles();
-
-        const modelFile = modelManager.addModelFile(model, undefined, true);
-        await modelManager.updateExternalModels();
-
-        const params = {
-            customClasses: options.customClasses,
-            timestamp: Date.now(),
-            modelManager,
-            fileWriter: new Writer(),
-        };
-
-        if(!options.visitor){
-            options.visitor = new HTMLFormVisitor ();
+    generateHTML (type) {
+        const classDeclaration = this.modelManager.getType(type);
+        if(!classDeclaration){
+            throw new Error(type + ' not found');
         }
 
-        return modelFile.accept(options.visitor , params);
+        const params = {
+            customClasses: this.options.customClasses,
+            timestamp: Date.now(),
+            modelManager: this.modelManager,
+        };
 
-        /*
-        let result = '<form>';
-        const text = parameters.fileWriter.getBuffer();
-        result += `${text}
-        </form>`;*/
+        let visitor = this.options.visitor;
+        if(!visitor){
+            visitor = new HTMLFormVisitor();
+            this.options.wrapHtmlForm = true;
+        }
+
+        const html = classDeclaration.accept(visitor, params);
+        if(this.options.wrapHtmlForm){
+            return visitor.wrapHtmlForm(html, params);
+        }
+        return html;
     }
 
 }

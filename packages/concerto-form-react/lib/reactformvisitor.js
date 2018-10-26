@@ -41,45 +41,11 @@ const {
 class ReactFormVisitor extends HTMLFormVisitor {
   /**
    * Visitor design pattern
-   * @param {ModelManager} modelManager - the object being visited
-   * @param {Object} parameters  - the parameter
-   * @return {Object} the result of visiting or null
-   * @private
-   */
-  visitModelManager(modelManager, parameters) {
-    return modelManager.getModelFiles().map(modelFile => {
-      return modelFile.accept(this, parameters);
-    });
-  }
-  /**
-   * Visitor design pattern
-   * @param {ModelFile} modelFile - the object being visited
-   * @param {Object} parameters  - the parameter
-   * @return {Object} the result of visiting or null
-   * @private
-   */
-
-
-  visitModelFile(modelFile, parameters) {
-    const styles = parameters.customClasses;
-    return modelFile.getAllDeclarations().map(decl => {
-      return React.createElement("div", {
-        key: decl.getName(),
-        className: styles.declaration
-      }, React.createElement("div", {
-        className: styles.declarationHeader
-      }, Utilities.normalizeLabel(decl.getName())), decl.accept(this, parameters));
-    });
-  }
-  /**
-   * Visitor design pattern
    * @param {EnumDeclaration} enumDeclaration - the object being visited
    * @param {Object} parameters  - the parameter
    * @return {Object} the result of visiting or null
    * @private
    */
-
-
   visitEnumDeclaration(enumDeclaration, parameters) {
     const styles = parameters.customClasses;
     const id = enumDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
@@ -91,7 +57,6 @@ class ReactFormVisitor extends HTMLFormVisitor {
     }, enumDeclaration.getOwnProperties().map(property => {
       return property.accept(this, parameters);
     })));
-    return null;
   }
   /**
    * Visitor design pattern
@@ -103,11 +68,15 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
 
   visitClassDeclaration(classDeclaration, parameters) {
+    const styles = parameters.customClasses;
+
     if (!classDeclaration.isSystemType() && !classDeclaration.isAbstract()) {
       const id = classDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
       return React.createElement("fieldset", {
         key: id
-      }, React.createElement("legend", null, Utilities.normalizeLabel(classDeclaration.getName())), React.createElement("div", {
+      }, React.createElement("h4", {
+        className: styles.declarationHeader
+      }, Utilities.normalizeLabel(classDeclaration.getName())), React.createElement("div", {
         name: classDeclaration.getName()
       }, classDeclaration.getOwnProperties().map(property => {
         return property.accept(this, parameters);
@@ -127,29 +96,48 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
   visitField(field, parameters) {
     const styles = parameters.customClasses;
-    let formField;
-
-    if (field.isPrimitive()) {
-      formField = React.createElement("input", {
-        type: this.toFieldType(field.getType()),
-        className: styles.input,
-        id: field.getName()
-      });
-    } else {
-      let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
-      formField = type.accept(this, parameters);
-    }
-
     let style = styles.field;
 
     if (!field.isOptional()) {
       style += ' ' + styles.required;
     }
 
-    return React.createElement("div", {
-      className: style,
-      id: field.getName()
-    }, React.createElement("label", null, Utilities.normalizeLabel(field.getName()), ":"), formField);
+    if (field.isArray()) {
+      return React.createElement("div", {
+        className: style,
+        key: field.getName()
+      }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("textarea", {
+        rows: "4"
+      }));
+    }
+
+    if (field.isPrimitive()) {
+      if (field.getType() === 'Boolean') {
+        return React.createElement("div", {
+          className: styles.field,
+          key: field.getName()
+        }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("div", {
+          className: styles.boolean
+        }, React.createElement("input", {
+          type: "checkbox"
+        }), React.createElement("label", null)));
+      }
+
+      return React.createElement("div", {
+        className: style,
+        key: field.getName()
+      }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("input", {
+        type: this.toFieldType(field.getType()),
+        className: styles.input,
+        id: field.getName()
+      }));
+    } else {
+      let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+      return React.createElement("div", {
+        className: style,
+        key: field.getName()
+      }, type.accept(this, parameters));
+    }
   }
   /**
    * Visitor design pattern
@@ -164,7 +152,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
     return React.createElement("option", {
       key: enumValueDeclaration.getName(),
       value: enumValueDeclaration.getName()
-    }, Utilities.normalizeLabel(enumValueDeclaration.getName()));
+    }, enumValueDeclaration.getName());
   }
   /**
    * Visitor design pattern
@@ -176,15 +164,31 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
 
   visitRelationship(relationship, parameters) {
-    // const styles = parameters.customClasses;
-    // const div = `<div className="${''}">`;
-    // const label = `<label for="${relationship.getName()}">${relationship.getName()}:</label>`;
-    // let formField = `<input type="${this.toFieldType(relationship.getType())}" className='${styles.input}' id="${relationship.getName()}">`;
-    // parameters.fileWriter.writeLine(1, div);
-    // parameters.fileWriter.writeLine(2, label);
-    // parameters.fileWriter.writeLine(2, formField);
-    // parameters.fileWriter.writeLine(1, '</div>' );
-    return null;
+    const styles = parameters.customClasses;
+    let fieldStyle = styles.field;
+
+    if (!relationship.isOptional()) {
+      fieldStyle += ' ' + styles.required;
+    }
+
+    return React.createElement("div", {
+      className: fieldStyle,
+      key: relationship.getName()
+    }, React.createElement("label", null, Utilities.normalizeLabel(relationship.getName())), React.createElement("input", {
+      type: "text",
+      className: styles.input,
+      id: relationship.getName()
+    }));
+  }
+  /**
+   * @param {object} result - the result of the visitor
+   * @param {object} parameters - the visitor parameters
+   * @returns {object} - a HTML string
+   */
+
+
+  wrapHtmlForm(result, parameters) {
+    return React.createElement("form", null, parameters.fileWriter.getBuffer());
   }
 
 }

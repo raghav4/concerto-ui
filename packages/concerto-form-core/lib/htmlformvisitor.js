@@ -24,6 +24,7 @@ const {
     EnumValueDeclaration,
   } = require('composer-concerto');
 const util = require('util');
+const Writer = require('composer-concerto').Writer;
 
 /**
  * Convert the contents of a ModelManager to TypeScript code.
@@ -44,6 +45,10 @@ class HTMLFormVisitor {
      * @private
      */
     visit(thing, parameters) {
+        if(!parameters.fileWriter) {
+            parameters.fileWriter = new Writer();
+        }
+
         if (thing instanceof ModelManager) {
             return this.visitModelManager(thing, parameters);
         } else if (thing instanceof ModelFile) {
@@ -61,34 +66,6 @@ class HTMLFormVisitor {
         } else {
             throw new Error('Unrecognised type: ' + typeof thing + ', value: ' + util.inspect(thing, { showHidden: true, depth: 2 }));
         }
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ModelManager} modelManager - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitModelManager(modelManager, parameters) {
-        modelManager.getModelFiles().forEach((modelFile) => {
-            modelFile.accept(this,parameters);
-        });
-        return null;
-    }
-
-    /**
-     * Visitor design pattern
-     * @param {ModelFile} modelFile - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitModelFile(modelFile, parameters) {
-        modelFile.getAllDeclarations().forEach((decl) => {
-            decl.accept(this, parameters);
-        });
-        return null;
     }
 
     /**
@@ -229,6 +206,19 @@ class HTMLFormVisitor {
         default:
             return type;
         }
+    }
+
+    /**
+     * @param {object} result - the result of the visitor
+     * @param {object} parameters - the visitor parameters
+     * @returns {object} - a HTML string
+     */
+    wrapHtmlForm(result, parameters) {
+        let html = '<form>';
+        const text = parameters.fileWriter.getBuffer();
+        html += `${text}
+        </form>`;
+        return html;
     }
 }
 
