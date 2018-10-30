@@ -22,3 +22,4 @@
  */
 
 module.exports.ReactFormVisitor = require('./lib/reactformvisitor.js');
+module.exports.ConcertoForm = require('./lib/concertoForm.js');

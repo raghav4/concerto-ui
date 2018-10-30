@@ -13,6 +13,7 @@
     "composer-concerto": "^0.31.4",
     "concerto-form-core": "^0.1.12",
     "debug": "2.6.2",
+    "jsonpath": "^1.0.0",
     "react": "^16.4.1",
     "react-bootstrap": "^0.32.1",
     "react-bootstrap-tabs": "^1.0.2",

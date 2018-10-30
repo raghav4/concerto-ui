@@ -24,6 +24,25 @@ const {
   } = require('composer-concerto');
 const {Utilities, HTMLFormVisitor} = require('concerto-form-core');
 
+Date.prototype.toDatetimeLocal =
+  function toDatetimeLocal() {
+    var
+      date = this,
+      ten = function (i) {
+        return (i < 10 ? '0' : '') + i;
+      },
+      YYYY = date.getFullYear(),
+      MM = ten(date.getMonth() + 1),
+      DD = ten(date.getDate()),
+      HH = ten(date.getHours()),
+      II = ten(date.getMinutes()),
+      SS = ten(date.getSeconds())
+    ;
+    return YYYY + '-' + MM + '-' + DD + 'T' +
+             HH + ':' + II + ':' + SS;
+  };
+
+
 /**
  * Convert the contents of a ModelManager to TypeScript code.
  * All generated code is placed into the 'main' package. Set a
@@ -43,16 +62,31 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitEnumDeclaration(enumDeclaration, parameters) {
+        let component = null;
+
+        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
+        if(!parameters.state[jsonReference]){
+            parameters.state[jsonReference] = jsonValue;
+        }
+
         const styles = parameters.customClasses;
         const id = enumDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
-        return (<div className={styles.field} key={id}>
+        component = (<div className={styles.field} key={id}>
           <label>{Utilities.normalizeLabel(enumDeclaration.getName())}:</label>
-          <select className={styles.enumeration}>
+          <select className={styles.enumeration}
+            value={parameters.state[jsonReference]}
+            onChange={(e)=>parameters.onChange(e, jsonReference)}
+            key={jsonReference} >
           {enumDeclaration.getOwnProperties().map((property) => {
               return property.accept(this,parameters);
           })}
           </select>
         </div>);
+
+        return component;
     }
 
     /**
@@ -63,11 +97,13 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitClassDeclaration(classDeclaration, parameters) {
+        let component = null;
+
         const styles = parameters.customClasses;
         if(!classDeclaration.isSystemType() &&
         !classDeclaration.isAbstract()) {
-            const id = classDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
-            return (
+            const id = classDeclaration.getName().toLowerCase();
+            component = (
               <fieldset key={id}>
                 <h4 className={styles.declarationHeader}>{Utilities.normalizeLabel(classDeclaration.getName())}</h4>
                 <div name={classDeclaration.getName()}>
@@ -79,7 +115,9 @@ class ReactFormVisitor extends HTMLFormVisitor {
               </fieldset>
             );
         }
-        return null;
+
+        parameters.stack.pop();
+        return component;
     }
 
     /**
@@ -90,6 +128,18 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitField(field, parameters) {
+        parameters.stack.push(field.getName());
+
+        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
+        if(!parameters.state[jsonReference]){
+            parameters.state[jsonReference] = jsonValue;
+        }
+                
+        let component = null;
+
         const styles = parameters.customClasses;
         let style = styles.field;
         if(!field.isOptional()){
@@ -97,34 +147,53 @@ class ReactFormVisitor extends HTMLFormVisitor {
         }
 
         if (field.isArray()) {
-            return (<div className={style} key={field.getName()}>
+            component = (<div className={style} key={field.getName()+'_wrapper'}>
                 <label>{Utilities.normalizeLabel(field.getName())}</label>
-                <textarea rows='4'/>                
+                <textarea rows='4'
+                    value={parameters.state[jsonReference]}
+                    onChange={(e)=>parameters.onChange(e, jsonReference)}
+                    key={jsonReference} />               
             </div>);
-        }
-
-        if (field.isPrimitive()) {
+        } else if (field.isPrimitive()) {
             if(field.getType() === 'Boolean'){
-                return (<div className={styles.field} key={field.getName()}>
+                component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
                     <label>{Utilities.normalizeLabel(field.getName())}</label>
                     <div className={styles.boolean}>
-                        <input type="checkbox"/>
+                        <input type="checkbox"
+                        value={parameters.state[jsonReference]}
+                        onChange={(e)=>parameters.onChange(e, jsonReference)}
+                        key={jsonReference} />   
                         <label/>
                     </div>
                 </div>);
+            } else if(this.toFieldType(field.getType()) === 'datetime-local'){
+                component = (<div className={style} key={field.getName()+'_wrapper'}>
+                    <label>{Utilities.normalizeLabel(field.getName())}</label>
+                    <input type={this.toFieldType(field.getType())}
+                        className={styles.input}
+                        value={new Date(parameters.state[jsonReference]).toDatetimeLocal()}
+                        onChange={(e)=>parameters.onChange(e, jsonReference)}
+                        key={jsonReference} />            
+                </div>);
+            } else {
+                component = (<div className={style} key={field.getName()+'_wrapper'}>
+                    <label>{Utilities.normalizeLabel(field.getName())}</label>
+                    <input type={this.toFieldType(field.getType())}
+                        className={styles.input}
+                        value={parameters.state[jsonReference]}
+                        onChange={(e)=>parameters.onChange(e, jsonReference)}
+                        key={jsonReference} />            
+                </div>);
             }
-            return (<div className={style} key={field.getName()}>
-                <label>{Utilities.normalizeLabel(field.getName())}</label>
-                <input type={this.toFieldType(field.getType())} className={styles.input} id={field.getName()}/>                
-            </div>);
         } else {
             let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
-            return (<div className={style} key={field.getName()}>
+            component = (<div className={style} key={field.getName()}>
                 {type.accept(this, parameters)}
             </div>);
         }
 
-        
+        parameters.stack.pop();
+        return component;
     }
 
     /**
@@ -146,15 +215,34 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @private
      */
     visitRelationship(relationship, parameters) {
+        parameters.stack.push(relationship.getName());
+
         const styles = parameters.customClasses;
         let fieldStyle = styles.field;
         if(!relationship.isOptional()){
             fieldStyle += ' ' + styles.required;
         }
-        return (<div className={fieldStyle} key={relationship.getName()}>
+
+        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
+        if(!parameters.state[jsonReference]){
+            parameters.state[jsonReference] = jsonValue;
+        }
+        const component = (<div className={fieldStyle} key={relationship.getName()}>
             <label>{Utilities.normalizeLabel(relationship.getName())}</label>
-            <input type='text' className={styles.input} id={relationship.getName()} />
+            <input 
+                type='text'
+                className={styles.input}
+                value={parameters.state[jsonReference]}
+                onChange={(e)=>parameters.onChange(e, jsonReference)}
+                key={jsonReference}
+                />
         </div>);
+
+        parameters.stack.pop();
+        return component;
 
     }
 
@@ -164,8 +252,8 @@ class ReactFormVisitor extends HTMLFormVisitor {
      * @returns {object} - a HTML string
      */
     wrapHtmlForm(result, parameters) {
-      return (<form>{parameters.fileWriter.getBuffer()}</form>);
-  }
+      return (<form>{result}</form>);
+    }
 }
 
 module.exports = ReactFormVisitor;

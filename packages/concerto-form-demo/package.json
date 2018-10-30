@@ -11,6 +11,7 @@
     "composer-concerto": "^0.31.3",
     "concerto-form-core": "^0.1.12",
     "concerto-form-react": "^0.1.12",
+    "jsonpath": "^1.0.0",
     "react": "^16.4.1",
     "react-bootstrap": "^0.32.1",
     "react-bootstrap-tabs": "^1.0.2",

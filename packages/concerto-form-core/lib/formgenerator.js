@@ -16,6 +16,9 @@
 const axios = require('axios');
 const fs = require('fs');
 const ModelManager = require('composer-concerto').ModelManager;
+const Factory = require('composer-concerto').Factory;
+const Serializer = require('composer-concerto').Serializer;
+
 const HTMLFormVisitor = require('./htmlformvisitor');
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
@@ -36,6 +39,8 @@ class FormGenerator {
     constructor(options) {
         this.modelManager = new ModelManager();
         this.options = options;
+        this.factory = new Factory(this.modelManager);
+        this.serializer = new Serializer(this.factory, this.modelManager);
     }
 
     /**
@@ -99,19 +104,37 @@ class FormGenerator {
 
     /**
     * @param {Object} type - The type from the model source to generate a form for
-    * @return {String} the generated HTML string
+    * @return {object} the generated HTML string
     */
-    generateHTML (type) {
+    generateHTML (type, options) {
         const classDeclaration = this.modelManager.getType(type);
         if(!classDeclaration){
             throw new Error(type + ' not found');
         }
 
-        const params = {
+        const ns = classDeclaration.getNamespace();
+        const name = classDeclaration.getName();
+        const factoryOptions =  { includeOptionalFields: true, generate: 'sample'};
+
+        let json = {};
+        if(classDeclaration.isConcept()){
+            const concept = this.factory.newConcept(ns, name, factoryOptions);
+            json = this.serializer.toJSON(concept);
+        // } else if (classDeclaration.isResource()){
+        //     const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
+        //     json = this.serializer.toJSON(resource);
+        } else {
+            throw new Error('incomplete implementation');
+        }
+
+        const params = Object.assign({
             customClasses: this.options.customClasses,
             timestamp: Date.now(),
             modelManager: this.modelManager,
-        };
+            json,
+            stack: [],
+            handleChanged: () => {}
+        }, options);
 
         let visitor = this.options.visitor;
         if(!visitor){
@@ -121,9 +144,9 @@ class FormGenerator {
 
         const html = classDeclaration.accept(visitor, params);
         if(this.options.wrapHtmlForm){
-            return visitor.wrapHtmlForm(html, params);
+            return { html: visitor.wrapHtmlForm(html, params), json};
         }
-        return html;
+        return { form: html, json };
     }
 
 }

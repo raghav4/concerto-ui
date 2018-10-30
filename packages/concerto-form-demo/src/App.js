@@ -15,7 +15,7 @@
 import React, { Component } from 'react';
 import './App.css';
 import {FormGenerator} from 'concerto-form-core'
-import {ReactFormVisitor} from 'concerto-form-react'
+import {ReactFormVisitor, ConcertoForm} from 'concerto-form-react'
 import {Tabs, Tab} from 'react-bootstrap-tabs'
 
 const options = {
@@ -36,6 +36,7 @@ class App extends Component {
   state = {
     types: [],
     form: null,
+    json: null,
     modelFile: `namespace org.accordproject.finance.bond
 
     import org.accordproject.organization.Organization from https://models.accordproject.org/organization.cto
@@ -96,12 +97,12 @@ class App extends Component {
   }
 
   async handleDeclarationSelectionChange(event) {
-    const form = generator.generateHTML(event.target.value);
-    this.setState({
-      form, 
-      types: generator.getTypes(),
-    })
+    this.setState({fqn: event.target.value});
     event.preventDefault();
+  }
+
+  async validateInstance(event){
+
   }
 
   async handleTextAreaSubmit(event) {
@@ -122,9 +123,8 @@ class App extends Component {
     this.setState({modelUrl: event.target.value});
   }
 
-
   render() {
-    const {form} = this.state
+    const {fqn} = this.state
     const {customClasses} = options
 
     return (
@@ -193,9 +193,11 @@ class App extends Component {
               </div>              
               <hr></hr>
               <h2>Form</h2>
-              <form className="ui form">
-              {form}
-              </form>
+              <ConcertoForm className="ui form" 
+                model={fqn}
+                generator={generator}
+                onSubmit={this.validateInstance.bind(this)}
+              />
             </div>
         </div>
       </div>

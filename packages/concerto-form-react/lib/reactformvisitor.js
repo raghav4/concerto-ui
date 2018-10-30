@@ -26,6 +26,21 @@ const {
   Utilities,
   HTMLFormVisitor
 } = require('concerto-form-core');
+
+Date.prototype.toDatetimeLocal = function toDatetimeLocal() {
+  var date = this,
+      ten = function (i) {
+    return (i < 10 ? '0' : '') + i;
+  },
+      YYYY = date.getFullYear(),
+      MM = ten(date.getMonth() + 1),
+      DD = ten(date.getDate()),
+      HH = ten(date.getHours()),
+      II = ten(date.getMinutes()),
+      SS = ten(date.getSeconds());
+
+  return YYYY + '-' + MM + '-' + DD + 'T' + HH + ':' + II + ':' + SS;
+};
 /**
  * Convert the contents of a ModelManager to TypeScript code.
  * All generated code is placed into the 'main' package. Set a
@@ -47,16 +62,30 @@ class ReactFormVisitor extends HTMLFormVisitor {
    * @private
    */
   visitEnumDeclaration(enumDeclaration, parameters) {
+    let component = null; // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+    // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+
+    const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+    const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator + '.' + index);
+
+    if (!parameters.state[jsonReference]) {
+      parameters.state[jsonReference] = jsonValue;
+    }
+
     const styles = parameters.customClasses;
     const id = enumDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
-    return React.createElement("div", {
+    component = React.createElement("div", {
       className: styles.field,
       key: id
     }, React.createElement("label", null, Utilities.normalizeLabel(enumDeclaration.getName()), ":"), React.createElement("select", {
-      className: styles.enumeration
+      className: styles.enumeration,
+      value: parameters.state[jsonReference],
+      onChange: e => parameters.onChange(e, jsonReference),
+      key: jsonReference
     }, enumDeclaration.getOwnProperties().map(property => {
       return property.accept(this, parameters);
     })));
+    return component;
   }
   /**
    * Visitor design pattern
@@ -68,11 +97,12 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
 
   visitClassDeclaration(classDeclaration, parameters) {
+    let component = null;
     const styles = parameters.customClasses;
 
     if (!classDeclaration.isSystemType() && !classDeclaration.isAbstract()) {
-      const id = classDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
-      return React.createElement("fieldset", {
+      const id = classDeclaration.getName().toLowerCase();
+      component = React.createElement("fieldset", {
         key: id
       }, React.createElement("h4", {
         className: styles.declarationHeader
@@ -83,7 +113,8 @@ class ReactFormVisitor extends HTMLFormVisitor {
       })));
     }
 
-    return null;
+    parameters.stack.pop();
+    return component;
   }
   /**
    * Visitor design pattern
@@ -95,6 +126,17 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
 
   visitField(field, parameters) {
+    parameters.stack.push(field.getName()); // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+    // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+
+    const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+    const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator + '.' + index);
+
+    if (!parameters.state[jsonReference]) {
+      parameters.state[jsonReference] = jsonValue;
+    }
+
+    let component = null;
     const styles = parameters.customClasses;
     let style = styles.field;
 
@@ -103,41 +145,61 @@ class ReactFormVisitor extends HTMLFormVisitor {
     }
 
     if (field.isArray()) {
-      return React.createElement("div", {
+      component = React.createElement("div", {
         className: style,
-        key: field.getName()
+        key: field.getName() + '_wrapper'
       }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("textarea", {
-        rows: "4"
+        rows: "4",
+        value: parameters.state[jsonReference],
+        onChange: e => parameters.onChange(e, jsonReference),
+        key: jsonReference
       }));
-    }
-
-    if (field.isPrimitive()) {
+    } else if (field.isPrimitive()) {
       if (field.getType() === 'Boolean') {
-        return React.createElement("div", {
+        component = React.createElement("div", {
           className: styles.field,
-          key: field.getName()
+          key: field.getName() + '_wrapper'
         }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("div", {
           className: styles.boolean
         }, React.createElement("input", {
-          type: "checkbox"
+          type: "checkbox",
+          value: parameters.state[jsonReference],
+          onChange: e => parameters.onChange(e, jsonReference),
+          key: jsonReference
         }), React.createElement("label", null)));
+      } else if (this.toFieldType(field.getType()) === 'datetime-local') {
+        component = React.createElement("div", {
+          className: style,
+          key: field.getName() + '_wrapper'
+        }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("input", {
+          type: this.toFieldType(field.getType()),
+          className: styles.input,
+          value: new Date(parameters.state[jsonReference]).toDatetimeLocal(),
+          onChange: e => parameters.onChange(e, jsonReference),
+          key: jsonReference
+        }));
+      } else {
+        component = React.createElement("div", {
+          className: style,
+          key: field.getName() + '_wrapper'
+        }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("input", {
+          type: this.toFieldType(field.getType()),
+          className: styles.input,
+          value: parameters.state[jsonReference],
+          onChange: e => parameters.onChange(e, jsonReference),
+          key: jsonReference
+        }));
       }
-
-      return React.createElement("div", {
-        className: style,
-        key: field.getName()
-      }, React.createElement("label", null, Utilities.normalizeLabel(field.getName())), React.createElement("input", {
-        type: this.toFieldType(field.getType()),
-        className: styles.input,
-        id: field.getName()
-      }));
     } else {
       let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
-      return React.createElement("div", {
+      component = React.createElement("div", {
         className: style,
         key: field.getName()
       }, type.accept(this, parameters));
     }
+
+    parameters.stack.pop();
+    return component;
   }
   /**
    * Visitor design pattern
@@ -164,21 +226,35 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
 
   visitRelationship(relationship, parameters) {
+    parameters.stack.push(relationship.getName());
     const styles = parameters.customClasses;
     let fieldStyle = styles.field;
 
     if (!relationship.isOptional()) {
       fieldStyle += ' ' + styles.required;
+    } // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+    // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+
+
+    const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+    const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator + '.' + index);
+
+    if (!parameters.state[jsonReference]) {
+      parameters.state[jsonReference] = jsonValue;
     }
 
-    return React.createElement("div", {
+    const component = React.createElement("div", {
       className: fieldStyle,
       key: relationship.getName()
     }, React.createElement("label", null, Utilities.normalizeLabel(relationship.getName())), React.createElement("input", {
       type: "text",
       className: styles.input,
-      id: relationship.getName()
+      value: parameters.state[jsonReference],
+      onChange: e => parameters.onChange(e, jsonReference),
+      key: jsonReference
     }));
+    parameters.stack.pop();
+    return component;
   }
   /**
    * @param {object} result - the result of the visitor
@@ -188,7 +264,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
 
   wrapHtmlForm(result, parameters) {
-    return React.createElement("form", null, parameters.fileWriter.getBuffer());
+    return React.createElement("form", null, result);
   }
 
 }

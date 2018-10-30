@@ -192,7 +192,7 @@ class HTMLFormVisitor {
     toFieldType(type) {
         switch(type) {
         case 'DateTime':
-            return 'date';
+            return 'datetime-local';
         case 'Boolean':
             return 'boolean';
         case 'String':
