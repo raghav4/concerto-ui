@@ -1,15 +1,23 @@
 const React = require('react');
 const Component = require('react').Component;
-const jsonpath = require('jsonpath')
+const jsonpath = require('jsonpath');
+const ReactFormVisitor = require('concerto-form-react').ReactFormVisitor;
+const Message = require('semantic-ui-react').Message;
 
 class ConcertoForm extends Component {
   constructor(props) {
     super(props);
 
     this.onChange = this.onChange.bind(this);
-    this.handleSubmit = this.handleSubmit.bind(this);
     this.fromJSON = this.fromJSON.bind(this);
-    this.state = {};
+    this.state = {json: {}};
+  }
+
+  componentWillReceiveProps(nextProps) {
+    // Any time props.model changes, update state.
+    if (nextProps.model !== this.props.model) {
+      this.setState({json: {}});
+    }
   }
 
   renderForm() {
@@ -26,56 +34,87 @@ class ConcertoForm extends Component {
           this.onChange(e, key);
         },
         state: this.state,
+        visitor: new ReactFormVisitor(),
     };
     if(this.props.generator && this.props.model){
-      const {form, json} = this.props.generator.generateHTML(this.props.model, options);
+      const {form} = this.props.generator.generateHTML(this.props.model, options);
       return form;
-    }
-    
+    }    
   } 
 
-  toJSON(){
+  toJSON(paths){
     const json = {
       $class: this.props.model
     };
-    Object.keys(this.state).map((key)=>{
-      jsonpath.value(json, key, this.state[key]);
+    Object.keys(paths).map((key)=>{
+      jsonpath.value(json, key, paths[key]);
     });
-    return JSON.stringify(json);
+    return JSON.stringify(json, null, 2);
   }
 
   fromJSON(e){
-    const json = JSON.parse(e.target.value);
-    const paths = jsonpath.paths(json, '$..*');
-    const state = this.state;
-    paths.map((path)=>{
-      const key = jsonpath.stringify(path);
-      state[key] = jsonpath.value(json,key);
-    });
-    this.setState(state);
+    try {
+      const instance = JSON.parse(e.target.value);
+      const paths = jsonpath.paths(instance, '$..*');
+      const json = {};
+      paths.map((path)=>{
+        const key = jsonpath.stringify(path);
+        json[key] = jsonpath.value(instance,key);
+      });
+      const warning = this.props.generator.validateInstance(instance);
+      if(warning){
+        this.setState({
+          instance: e.target.value,
+          warning,
+        });
+      } else {
+        this.setState({
+          json,
+          instance: this.toJSON(json),
+          warning,
+        });
+      }
+    } catch (error) {
+      this.setState({instance: e.target.value, warning: error.message});
+    }
   }
 
   onChange(e, key) {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    this.setState({
-      [key]: value
-    });
-  }
-
-  handleSubmit(event) {
-    event.preventDefault();
+    const state = this.state;
+    state.json[key] = value;
+    state.instance = this.toJSON(state.json);
+    state.warning = this.props.generator.validateInstance(JSON.parse(state.instance)),
+    this.setState(state);
   }
 
   render() {
-    return (<form className="ui form" onSubmit={this.handleSubmit}>
-        {this.renderForm()}
-        <div className=''>
-          <button type='submit'>Validate</button>
-        </div>
+    let warning = null;
+    let jsonArea = null;
+    if(this.state.warning){
+      warning = (<Message warning>
+        <p>{this.state.warning}</p>
+      </Message>);
+    }
+
+    if(this.state.instance){
+      jsonArea = (<div>
+        <hr></hr>
+        <h4>JSON</h4>     
+        {warning}
         <div className='ui form field'>
-          <textarea value={this.toJSON()} onChange={this.fromJSON}/>
+          < textarea value={this.state.instance} onChange={this.fromJSON}/>
         </div>
-    </form>);
+      </div>
+      );
+    }
+    
+    return (<div>
+        <form className="ui form">
+          {this.renderForm()}
+        </form>   
+        {jsonArea}
+      </div>);
   }
 }
 

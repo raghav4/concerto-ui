@@ -24,7 +24,7 @@ const {
     EnumValueDeclaration,
   } = require('composer-concerto');
 const util = require('util');
-const Writer = require('composer-concerto').Writer;
+const Writer = require('composer-concerto-tools').Writer;
 
 /**
  * Convert the contents of a ModelManager to TypeScript code.

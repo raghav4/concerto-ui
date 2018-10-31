@@ -99,7 +99,24 @@ class FormGenerator {
         return this.modelManager.getModelFiles()
             .reduce((classDeclarations, modelFile) => {
                 return classDeclarations.concat(modelFile.getAllDeclarations());
-            }, []);
+            }, [])
+            .filter(classDeclaration => {
+                return !classDeclaration.isEnum() && !classDeclaration.isAbstract();
+            });
+    }
+
+    /**
+     * Returns a validation error message if the provided JSON object is not a valid instance of a model
+     * @param {object} json - a JSON instance of a model
+     * @returns {string} - the validation message, or null if the object is valid
+     */
+    validateInstance(json){
+        try {
+            this.modelManager.getSerializer().fromJSON(json);
+        } catch (error) {
+            return error.message;
+        }
+        return null;
     }
 
     /**
@@ -112,23 +129,29 @@ class FormGenerator {
             throw new Error(type + ' not found');
         }
 
+        if(classDeclaration.isEnum()){
+            throw new Error('Cannot generate forms for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
+        }
+
+        if(classDeclaration.isAbstract()){
+            throw new Error('Cannot generate forms for abstract types');
+        }
+
         const ns = classDeclaration.getNamespace();
         const name = classDeclaration.getName();
         const factoryOptions =  { includeOptionalFields: true, generate: 'sample'};
 
-        let json = {};
+        let json = options.json;
         if(classDeclaration.isConcept()){
             const concept = this.factory.newConcept(ns, name, factoryOptions);
             json = this.serializer.toJSON(concept);
-        // } else if (classDeclaration.isResource()){
-        //     const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
-        //     json = this.serializer.toJSON(resource);
         } else {
-            throw new Error('incomplete implementation');
+            const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
+            json = this.serializer.toJSON(resource);
         }
 
         const params = Object.assign({
-            customClasses: this.options.customClasses,
+            customClasses: {},
             timestamp: Date.now(),
             modelManager: this.modelManager,
             json,
@@ -136,14 +159,14 @@ class FormGenerator {
             handleChanged: () => {}
         }, options);
 
-        let visitor = this.options.visitor;
+        let visitor = params.visitor;
         if(!visitor){
             visitor = new HTMLFormVisitor();
-            this.options.wrapHtmlForm = true;
+            params.wrapHtmlForm = true;
         }
 
         const html = classDeclaration.accept(visitor, params);
-        if(this.options.wrapHtmlForm){
+        if(params.wrapHtmlForm){
             return { html: visitor.wrapHtmlForm(html, params), json};
         }
         return { form: html, json };

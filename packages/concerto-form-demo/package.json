@@ -8,7 +8,7 @@
   },
   "private": true,
   "dependencies": {
-    "composer-concerto": "^0.31.3",
+    "composer-concerto": "^0.60",
     "concerto-form-core": "^0.1.12",
     "concerto-form-react": "^0.1.12",
     "jsonpath": "^1.0.0",

@@ -54,40 +54,6 @@ Date.prototype.toDatetimeLocal =
  * @memberof module:composer-common
  */
 class ReactFormVisitor extends HTMLFormVisitor {
-    /**
-     * Visitor design pattern
-     * @param {EnumDeclaration} enumDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
-    visitEnumDeclaration(enumDeclaration, parameters) {
-        let component = null;
-
-        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
-        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
-        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
-        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
-        if(!parameters.state[jsonReference]){
-            parameters.state[jsonReference] = jsonValue;
-        }
-
-        const styles = parameters.customClasses;
-        const id = enumDeclaration.getName().toLowerCase() + '-' + parameters.timestamp;
-        component = (<div className={styles.field} key={id}>
-          <label>{Utilities.normalizeLabel(enumDeclaration.getName())}:</label>
-          <select className={styles.enumeration}
-            value={parameters.state[jsonReference]}
-            onChange={(e)=>parameters.onChange(e, jsonReference)}
-            key={jsonReference} >
-          {enumDeclaration.getOwnProperties().map((property) => {
-              return property.accept(this,parameters);
-          })}
-          </select>
-        </div>);
-
-        return component;
-    }
 
     /**
      * Visitor design pattern
@@ -103,23 +69,69 @@ class ReactFormVisitor extends HTMLFormVisitor {
         if(!classDeclaration.isSystemType() &&
         !classDeclaration.isAbstract()) {
             const id = classDeclaration.getName().toLowerCase();
-            component = (
-              <fieldset key={id}>
-                <h4 className={styles.declarationHeader}>{Utilities.normalizeLabel(classDeclaration.getName())}</h4>
-                <div name={classDeclaration.getName()}>
-                
-                {classDeclaration.getOwnProperties().map((property) => {
-                    return property.accept(this,parameters);
-                })}
-                </div>
-              </fieldset>
-            );
+            if(parameters.stack.length === 0) {
+                component = (
+                    <div key={id}>
+                        <div name={classDeclaration.getName()}>
+                        
+                        {classDeclaration.getProperties().map((property) => {
+                            return property.accept(this,parameters);
+                        })}
+                        </div>
+                    </div>
+                    );
+            } else {
+                component = (
+                <fieldset key={id}>
+                    <div name={classDeclaration.getName()}>
+                    
+                    {classDeclaration.getProperties().map((property) => {
+                        return property.accept(this,parameters);
+                    })}
+                    </div>
+                </fieldset>
+                );
+            }
         }
-
-        parameters.stack.pop();
         return component;
     }
 
+
+    /**
+     * Visitor design pattern
+     * @param {EnumDeclaration} enumDeclaration - the object being visited
+     * @param {Object} parameters  - the parameter
+     * @return {Object} the result of visiting or null
+     * @private
+     */
+    visitEnumDeclaration(enumDeclaration, parameters) {
+        let component = null;
+
+        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
+        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
+        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
+        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
+        if(!parameters.state.json[jsonReference]){
+            parameters.state.json[jsonReference] = jsonValue;
+        }
+
+        const styles = parameters.customClasses;
+        const id = enumDeclaration.getName().toLowerCase();
+        component = (<div className={styles.field} key={id}>
+          <select className={styles.enumeration}
+            value={parameters.state.json[jsonReference]}
+            onChange={(e)=>parameters.onChange(e, jsonReference)}
+            key={jsonReference} >
+          {enumDeclaration.getOwnProperties().map((property) => {
+              return property.accept(this,parameters);
+          })}
+          </select>
+        </div>);
+
+        return component;
+    }
+
+    
     /**
      * Visitor design pattern
      * @param {Field} field - the object being visited
@@ -134,8 +146,8 @@ class ReactFormVisitor extends HTMLFormVisitor {
         // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
         const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
         const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
-        if(!parameters.state[jsonReference]){
-            parameters.state[jsonReference] = jsonValue;
+        if(!parameters.state.json[jsonReference]){
+            parameters.state.json[jsonReference] = jsonValue;
         }
                 
         let component = null;
@@ -160,7 +172,8 @@ class ReactFormVisitor extends HTMLFormVisitor {
                     <label>{Utilities.normalizeLabel(field.getName())}</label>
                     <div className={styles.boolean}>
                         <input type="checkbox"
-                        value={parameters.state[jsonReference]}
+                        checked={parameters.state.json[jsonReference]}
+                        value={parameters.state.json[jsonReference]}
                         onChange={(e)=>parameters.onChange(e, jsonReference)}
                         key={jsonReference} />   
                         <label/>
@@ -171,7 +184,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                     <label>{Utilities.normalizeLabel(field.getName())}</label>
                     <input type={this.toFieldType(field.getType())}
                         className={styles.input}
-                        value={new Date(parameters.state[jsonReference]).toDatetimeLocal()}
+                        value={new Date(parameters.state.json[jsonReference]).toDatetimeLocal()}
                         onChange={(e)=>parameters.onChange(e, jsonReference)}
                         key={jsonReference} />            
                 </div>);
@@ -180,14 +193,16 @@ class ReactFormVisitor extends HTMLFormVisitor {
                     <label>{Utilities.normalizeLabel(field.getName())}</label>
                     <input type={this.toFieldType(field.getType())}
                         className={styles.input}
-                        value={parameters.state[jsonReference]}
+                        value={parameters.state.json[jsonReference]}
                         onChange={(e)=>parameters.onChange(e, jsonReference)}
                         key={jsonReference} />            
                 </div>);
             }
         } else {
             let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+            type = this.findConcreteSubclass(type);
             component = (<div className={style} key={field.getName()}>
+                <label>{Utilities.normalizeLabel(field.getName())}</label>
                 {type.accept(this, parameters)}
             </div>);
         }
@@ -227,15 +242,15 @@ class ReactFormVisitor extends HTMLFormVisitor {
         // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
         const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
         const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
-        if(!parameters.state[jsonReference]){
-            parameters.state[jsonReference] = jsonValue;
+        if(!parameters.state.json[jsonReference]){
+            parameters.state.json[jsonReference] = jsonValue;
         }
         const component = (<div className={fieldStyle} key={relationship.getName()}>
             <label>{Utilities.normalizeLabel(relationship.getName())}</label>
             <input 
                 type='text'
                 className={styles.input}
-                value={parameters.state[jsonReference]}
+                value={parameters.state.json[jsonReference]}
                 onChange={(e)=>parameters.onChange(e, jsonReference)}
                 key={jsonReference}
                 />
@@ -243,16 +258,32 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
         parameters.stack.pop();
         return component;
-
     }
 
     /**
-     * @param {object} result - the result of the visitor
-     * @param {object} parameters - the visitor parameters
-     * @returns {object} - a HTML string
+     * Find a concrete type that extends the provided type. If the supplied type argument is
+     * not abstract then it will be returned.
+     * TODO: work out whether this has to be a leaf node or whether the closest type can be used
+     * It depends really since the closest type will satisfy the model but whether it satisfies
+     * any transaction code which attempts to use the generated resource is another matter.
+     * @param {ClassDeclaration} declaration the class declaration.
+     * @return {ClassDeclaration} the closest extending concrete class definition.
+     * @throws {Error} if no concrete subclasses exist.
      */
-    wrapHtmlForm(result, parameters) {
-      return (<form>{result}</form>);
+    findConcreteSubclass(declaration) {
+        if (!declaration.isAbstract()) {
+            return declaration;
+        }
+
+        const concreteSubclasses = declaration.getAssignableClassDeclarations()
+            .filter(subclass => !subclass.isAbstract())
+            .filter(subclass => !subclass.isSystemType());
+
+        if (concreteSubclasses.length === 0) {
+            throw new Error('No concrete subclasses found');
+        }
+
+        return concreteSubclasses[0];
     }
 }
 

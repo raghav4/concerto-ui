@@ -96,3 +96,4 @@ lib/query/parser.js
 index.d.ts
 lib/systemmodel.js
 composer-*.tgz
+lib/
