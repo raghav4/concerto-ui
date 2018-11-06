@@ -26,7 +26,18 @@ class App extends Component {
     form: null,
     json: null,
     modelUrl: '',
-    modelFile: `namespace org.accordproject.acceptanceofdelivery
+    modelFile: 
+//     `
+//     namespace matt
+
+// concept MyConcept {
+// o Foo[] foos
+// }
+
+// concept Foo {
+// o String bar
+// }`,
+    `namespace org.accordproject.acceptanceofdelivery
 
     import org.accordproject.cicero.contract.* from https://models.accordproject.org/cicero/contract.cto
     import org.accordproject.organization.Organization from https://models.accordproject.org/organization.cto

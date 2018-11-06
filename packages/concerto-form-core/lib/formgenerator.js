@@ -141,15 +141,17 @@ class FormGenerator {
         const name = classDeclaration.getName();
         const factoryOptions =  { includeOptionalFields: true, generate: 'sample'};
 
-        let json = options.json;
-        if(classDeclaration.isConcept()){
-            const concept = this.factory.newConcept(ns, name, factoryOptions);
-            json = this.serializer.toJSON(concept);
-        } else {
-            const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
-            json = this.serializer.toJSON(resource);
+        let json = options.state.json;
+        // console.log(json);
+        if(!json){
+            if(classDeclaration.isConcept()){
+                const concept = this.factory.newConcept(ns, name, factoryOptions);
+                json = this.serializer.toJSON(concept);
+            } else {
+                const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
+                json = this.serializer.toJSON(resource);
+            }
         }
-
         const params = Object.assign({
             customClasses: {},
             timestamp: Date.now(),

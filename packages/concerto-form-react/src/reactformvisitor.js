@@ -15,12 +15,14 @@
 'use strict';
 
 const React = require('react');
+const jsonpath = require('jsonpath');
 
 const {
     ClassDeclaration,
     Field,
     EnumDeclaration,
     EnumValueDeclaration,
+    ModelUtil,
   } = require('composer-concerto');
 const {Utilities, HTMLFormVisitor} = require('concerto-form-core');
 
@@ -70,8 +72,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
         !classDeclaration.isAbstract()) {
             const id = classDeclaration.getName().toLowerCase();
             if(parameters.stack.length === 0) {
-                component = (
-                    <div key={id}>
+                component = (<div key={id}>
                         <div name={classDeclaration.getName()}>
                         
                         {classDeclaration.getProperties().map((property) => {
@@ -106,23 +107,17 @@ class ReactFormVisitor extends HTMLFormVisitor {
      */
     visitEnumDeclaration(enumDeclaration, parameters) {
         let component = null;
-
-        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
-        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
-        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
-        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
-        if(!parameters.state.json[jsonReference]){
-            parameters.state.json[jsonReference] = jsonValue;
-        }
+        const key = jsonpath.stringify(parameters.stack);
+        const value = jsonpath.value(parameters.json,key);
 
         const styles = parameters.customClasses;
         const id = enumDeclaration.getName().toLowerCase();
         component = (<div className={styles.field} key={id}>
           <select className={styles.enumeration}
-            value={parameters.state.json[jsonReference]}
-            onChange={(e)=>parameters.onChange(e, jsonReference)}
-            key={jsonReference} >
-          {enumDeclaration.getOwnProperties().map((property) => {
+            value={value}
+            onChange={(e)=>parameters.onChange(e, key)}
+            key={key} >
+          {enumDeclaration.getProperties().map((property) => {
               return property.accept(this,parameters);
           })}
           </select>
@@ -142,14 +137,8 @@ class ReactFormVisitor extends HTMLFormVisitor {
     visitField(field, parameters) {
         parameters.stack.push(field.getName());
 
-        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
-        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
-        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
-        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
-        if(!parameters.state.json[jsonReference]){
-            parameters.state.json[jsonReference] = jsonValue;
-        }
-                
+        const key = jsonpath.stringify(parameters.stack);
+        const value = jsonpath.value(parameters.json,key);
         let component = null;
 
         const styles = parameters.customClasses;
@@ -159,45 +148,99 @@ class ReactFormVisitor extends HTMLFormVisitor {
         }
 
         if (field.isArray()) {
+            let arrayField = (field, parameters) => {
+              if (field.isPrimitive()){
+                if(field.getType() === 'Boolean'){
+                  return(<div className={styles.field} key={field.getName()+'_wrapper'}>
+                        <div className={styles.boolean}>
+                            <input type="checkbox"
+                            checked={value}
+                            value={value}
+                            onChange={(e)=>parameters.onChange(e, key)}
+                            key={key} />   
+                            <label/>
+                        </div>
+                    </div>);
+                } else if(this.toFieldType(field.getType()) === 'datetime-local'){
+                  return (<div className={styles.field} key={field.getName()+'_wrapper'}>
+                        <input type={this.toFieldType(field.getType())}
+                            className={styles.input}
+                            value={new Date(value).toDatetimeLocal()}
+                            onChange={(e)=>parameters.onChange(e, key)}
+                            key={key} />            
+                    </div>);
+                } else {
+                  return (<div className={styles.field} key={field.getName()+'_wrapper'}>
+                        <input type={this.toFieldType(field.getType())}
+                            className={styles.input}
+                            value={value}
+                            onChange={(e)=>parameters.onChange(e, key)}
+                            key={key} />            
+                    </div>);
+                }
+              } else {
+                let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
+                type = this.findConcreteSubclass(type);
+                return type.accept(this, parameters)
+              }
+            }            
+            
             component = (<div className={style} key={field.getName()+'_wrapper'}>
                 <label>{Utilities.normalizeLabel(field.getName())}</label>
-                <textarea rows='4'
-                    value={parameters.state[jsonReference]}
-                    onChange={(e)=>parameters.onChange(e, jsonReference)}
-                    key={jsonReference} />               
+                <fieldset>
+                    {value.map((element, index) => {
+                        parameters.stack.push(index);
+                        const arrayComponent = (
+                            <div key={field.getName()+'_wrapper['+index+']'}>
+                                {arrayField(field, parameters)}
+                                <input type='button'
+                                    className={styles.button} 
+                                    value='Delete'
+                                    onClick={(e)=>{parameters.removeElement(e, key, index)}} />
+                            </div>                            
+                        );
+                        parameters.stack.pop();
+                        return arrayComponent;
+                    })}
+                </fieldset>
+                <input type='button'
+                    className={styles.button} 
+                    value='Add'
+                    // TODO generate a new value rather than relying on the first element
+                    onClick={(e)=>{parameters.addElement(e, key, value[0])}} />
             </div>);
         } else if (field.isPrimitive()) {
-            if(field.getType() === 'Boolean'){
-                component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
-                    <label>{Utilities.normalizeLabel(field.getName())}</label>
-                    <div className={styles.boolean}>
-                        <input type="checkbox"
-                        checked={parameters.state.json[jsonReference]}
-                        value={parameters.state.json[jsonReference]}
-                        onChange={(e)=>parameters.onChange(e, jsonReference)}
-                        key={jsonReference} />   
-                        <label/>
-                    </div>
-                </div>);
-            } else if(this.toFieldType(field.getType()) === 'datetime-local'){
-                component = (<div className={style} key={field.getName()+'_wrapper'}>
-                    <label>{Utilities.normalizeLabel(field.getName())}</label>
-                    <input type={this.toFieldType(field.getType())}
-                        className={styles.input}
-                        value={new Date(parameters.state.json[jsonReference]).toDatetimeLocal()}
-                        onChange={(e)=>parameters.onChange(e, jsonReference)}
-                        key={jsonReference} />            
-                </div>);
-            } else {
-                component = (<div className={style} key={field.getName()+'_wrapper'}>
-                    <label>{Utilities.normalizeLabel(field.getName())}</label>
-                    <input type={this.toFieldType(field.getType())}
-                        className={styles.input}
-                        value={parameters.state.json[jsonReference]}
-                        onChange={(e)=>parameters.onChange(e, jsonReference)}
-                        key={jsonReference} />            
-                </div>);
-            }
+          if(field.getType() === 'Boolean'){
+            component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
+                  <label>{Utilities.normalizeLabel(field.getName())}</label>
+                  <div className={styles.boolean}>
+                      <input type="checkbox"
+                      checked={value}
+                      value={value}
+                      onChange={(e)=>parameters.onChange(e, key)}
+                      key={key} />   
+                      <label/>
+                  </div>
+              </div>);
+          } else if(this.toFieldType(field.getType()) === 'datetime-local'){
+            component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
+                  <label>{Utilities.normalizeLabel(field.getName())}</label>
+                  <input type={this.toFieldType(field.getType())}
+                      className={styles.input}
+                      value={new Date(value).toDatetimeLocal()}
+                      onChange={(e)=>parameters.onChange(e, key)}
+                      key={key} />            
+              </div>);
+          } else {
+            component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
+                  <label>{Utilities.normalizeLabel(field.getName())}</label>
+                  <input type={this.toFieldType(field.getType())}
+                      className={styles.input}
+                      value={value}
+                      onChange={(e)=>parameters.onChange(e, key)}
+                      key={key} />            
+              </div>);
+          }
         } else {
             let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
             type = this.findConcreteSubclass(type);
@@ -238,21 +281,17 @@ class ReactFormVisitor extends HTMLFormVisitor {
             fieldStyle += ' ' + styles.required;
         }
 
-        // Use the current stack i.e. ['bond', 'currency', 'currencyCode'] to resolve the value
-        // in the JSON serialization of the declaration, i.e. json['bond']['currency']['currencyCode']
-        const jsonValue = parameters.stack.reduce((accumulator, index) => accumulator[index], parameters.json);
-        const jsonReference = '$.' + parameters.stack.reduce((accumulator, index) => accumulator+'.'+index);
-        if(!parameters.state.json[jsonReference]){
-            parameters.state.json[jsonReference] = jsonValue;
-        }
+        const key = jsonpath.stringify(parameters.stack);
+        const value = jsonpath.value(parameters.json,key);
+       
         const component = (<div className={fieldStyle} key={relationship.getName()}>
             <label>{Utilities.normalizeLabel(relationship.getName())}</label>
             <input 
                 type='text'
                 className={styles.input}
-                value={parameters.state.json[jsonReference]}
-                onChange={(e)=>parameters.onChange(e, jsonReference)}
-                key={jsonReference}
+                value={value}
+                onChange={(e)=>parameters.onChange(e, key)}
+                key={key}
                 />
         </div>);
 
