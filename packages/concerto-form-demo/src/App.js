@@ -27,88 +27,36 @@ class App extends Component {
     json: null,
     modelUrl: '',
     modelFile: 
-//     `
-//     namespace matt
+    `
+    namespace org.hyperledger.concerto.form.test
 
-// concept MyConcept {
-// o Foo[] foos
-// }
+    concept Foo {
+      o String s
+      o Boolean b optional
+      o DateTime dt
+      o Integer i
+      o Double d
+      o Bar bar
+      o String[] ss
+      o Boolean[] bs
+      o DateTime[] dts
+      o Bar[] bars
+      o Nums n
+    }
 
-// concept Foo {
-// o String bar
-// }`,
-    `namespace org.accordproject.acceptanceofdelivery
+    enum Nums {
+      o ONE
+      o TWO
+    }
 
-    import org.accordproject.cicero.contract.* from https://models.accordproject.org/cicero/contract.cto
-    import org.accordproject.organization.Organization from https://models.accordproject.org/organization.cto
-    
-    /* A request is a transaction */
-    transaction Request  identified by transactionId {
-      o String transactionId
+    abstract concept Bar {
+      o String s
     }
-    
-    /* A response is a transaction */
-    transaction Response  identified by transactionId {
-      o String transactionId
+
+    concept Baz extends Bar{
+      o String t
     }
-    
-    /**
-     * Sent by the receiver of the goods, indicates when the goods were
-     * received, as well as if they passed inspection
-     */
-    transaction InspectDeliverable extends Request{
-    
-      o DateTime deliverableReceivedAt
-      o Boolean inspectionPassed
-    }
-    
-    /**
-     * The inspection status
-     */
-    enum InspectionStatus {
-      o PASSED_TESTING
-      o FAILED_TESTING
-      o OUTSIDE_INSPECTION_PERIOD
-    }
-    
-    /**
-     * The clause response
-     */
-    transaction InspectionResponse extends Response {
-      o InspectionStatus status
-      --> Organization shipper
-      --> Organization receiver
-    }
-    
-    /**
-     * The template model
-     */
-    asset AcceptanceOfDeliveryClause extends AccordClause {
-      /**
-       * the shipper of the goods
-       */
-      --> Organization shipper
-    
-      /**
-       * the receiver of the goods
-       */
-      --> Organization receiver
-    
-      /**
-       * what are we delivering
-       */
-      o String deliverable
-    
-      /**
-       * how long does the receiver have to inspect the goods
-       */
-      o Long businessDays
-    
-      /**
-       * additional information
-       */
-      o String attachment
-    }`,
+    `
   }
 
   async loadModel (file, type) {

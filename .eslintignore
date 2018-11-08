@@ -15,5 +15,8 @@
 coverage
 node_modules
 out
-lib/**/*.js
-__snapshots__
+lib/introspect/parser.js
+lib/acl/parser.js
+lib/query/parser.js
+test/data
+umd

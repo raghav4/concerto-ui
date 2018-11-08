@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-'use strict';
+
 
 /**
  * Hyperledger-Composer module. Hyperledger-Composer is a framework for creating

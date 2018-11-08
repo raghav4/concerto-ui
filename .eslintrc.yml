@@ -2,13 +2,7 @@ env:
     es6: true
     node: true
     mocha: true
-    "jest/globals": true
-extends: 
-    - 'eslint:recommended'
-    - 'plugin:react/recommended'
-plugins: 
-    - react
-    - jest
+extends: 'eslint:recommended'
 parserOptions:
     ecmaVersion: 8
     sourceType: module
@@ -42,7 +36,7 @@ rules:
     no-with: error
     operator-linebreak: error
     require-jsdoc:
-        - warn
+        - error
         - require:
             ClassDeclaration: true
             MethodDefinition: true

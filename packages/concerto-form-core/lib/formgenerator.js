@@ -121,6 +121,7 @@ class FormGenerator {
 
     /**
     * @param {Object} type - The type from the model source to generate a form for
+    * @param {Object} options - The options object
     * @return {object} the generated HTML string
     */
     generateHTML (type, options) {
@@ -142,7 +143,6 @@ class FormGenerator {
         const factoryOptions =  { includeOptionalFields: true, generate: 'sample'};
 
         let json = options.state.json;
-        // console.log(json);
         if(!json){
             if(classDeclaration.isConcept()){
                 const concept = this.factory.newConcept(ns, name, factoryOptions);
@@ -152,13 +152,13 @@ class FormGenerator {
                 json = this.serializer.toJSON(resource);
             }
         }
+
         const params = Object.assign({
             customClasses: {},
             timestamp: Date.now(),
             modelManager: this.modelManager,
             json,
             stack: [],
-            handleChanged: () => {}
         }, options);
 
         let visitor = params.visitor;
