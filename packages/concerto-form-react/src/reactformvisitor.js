@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-
-
 const React = require('react');
 const jsonpath = require('jsonpath');
 const {Utilities, HTMLFormVisitor} = require('concerto-form-core');

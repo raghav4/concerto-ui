@@ -2,15 +2,16 @@ env:
     es6: true
     node: true
     mocha: true
-extends: 'eslint:recommended'
+extends: 
+    - 'eslint:recommended'
+    - 'plugin:react/recommended'
 parserOptions:
     ecmaVersion: 8
-    sourceType:
-        - script
+    sourceType: module
 rules:
     indent:
         - error
-        - 4
+        - 2
     linebreak-style:
         - error
         - unix
@@ -37,7 +38,7 @@ rules:
     no-with: error
     operator-linebreak: error
     require-jsdoc:
-        - error
+        - warn
         - require:
             ClassDeclaration: true
             MethodDefinition: true

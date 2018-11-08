@@ -140,7 +140,10 @@ class FormGenerator {
 
         const ns = classDeclaration.getNamespace();
         const name = classDeclaration.getName();
-        const factoryOptions =  { includeOptionalFields: true, generate: 'sample'};
+        const factoryOptions =  {
+            includeOptionalFields: options.includeOptionalFields,
+            generate: options.includeSampleData,
+        };
 
         let json = options.state.json;
         if(!json){
