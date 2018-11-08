@@ -14,83 +14,64 @@
 
 import React, { Component } from 'react';
 import './App.css';
-import {FormGenerator} from 'concerto-form-core'
 import {ConcertoForm} from 'concerto-form-react'
 import { Tab } from 'semantic-ui-react'
 
-const generator = new FormGenerator();
-
 class App extends Component {
-  state = {
-    types: [],
-    form: null,
-    json: null,
-    modelUrl: '',
-    modelFile: 
-    `
-    namespace org.hyperledger.concerto.form.test
 
-    concept Foo {
-      o String s
-      o Boolean b optional
-      o DateTime dt
-      o Integer i
-      o Double d
-      o Bar bar
-      o String[] ss
-      o Boolean[] bs
-      o DateTime[] dts
-      o Bar[] bars
-      o Nums n
-    }
+  constructor(props){
+    super(props);
 
-    enum Nums {
-      o ONE
-      o TWO
-    }
+    this.form = React.createRef();
 
-    abstract concept Bar {
-      o String s
-    }
+    this.state = {
+      fqn: '',
+      types: [],
+      modelUrl: '',
+      modelFile: 
+      `
+      namespace org.hyperledger.concerto.form.test
+  
+      concept Foo {
+        o String s
+        o Boolean b optional
+        o DateTime dt
+        o Integer i
+        o Double d
+        o Bar bar
+        o String[] ss
+        o Boolean[] bs
+        o DateTime[] dts
+        o Bar[] bars
+        o Nums n
+      }
+  
+      enum Nums {
+        o ONE
+        o TWO
+      }
+  
+      abstract concept Bar {
+        o String s
+      }
+  
+      concept Baz extends Bar{
+        o String t
+      }
+      `
+    };
 
-    concept Baz extends Bar{
-      o String t
-    }
-    `
-  }
-
-  async loadModel (file, type) {
-    if  (type === 'text') {
-      await generator.loadFromText(file);
-    } else if (type === 'url') {
-      await generator.loadFromUrl(file);
-    }
-    console.log('loaded model');
-    const types = generator.getTypes();
-    const state = { types };
-    if(types.length > 0){
-      state.fqn = types[0].getFullyQualifiedName();
-    }
-    this.setState(state);
+    this.onModelChange = this.onModelChange.bind(this);
   }
 
   async handleDeclarationSelectionChange(event) {
     this.setState({fqn: event.target.value});
     event.preventDefault();
   }
-
-  async handleTextAreaSubmit(event) {
-    this.loadModel(this.state.modelFile, 'text')
-    event.preventDefault();
-  }
   
   handleTextAreaChange(event) {
     this.setState({modelFile: event.target.value});
-  }
-
-  async handleUrlSubmit(event) {
-    this.loadModel(this.state.modelUrl, 'url')
-    event.preventDefault();
+    // event.preventDefault();
   }
   
   handleUrlChange(event) {
@@ -98,66 +79,37 @@ class App extends Component {
     event.preventDefault();
   }
 
-  render() {
-    const {fqn} = this.state;
+  onModelChange(types){
+    if(types.length > 0){
+      this.setState({types, fqn: types[0].getFullyQualifiedName()});
+    }
+  }
 
+  render() {
     const panes = [
       { menuItem: 'Model Editor', render: () => (<Tab.Pane>
-        <form onSubmit={this.handleTextAreaSubmit.bind(this)}>
+        <form>
           <div className="ui form">
             <textarea 
               value={this.state.modelFile} 
               onChange={this.handleTextAreaChange.bind(this)}
               className={'form-control Text-area'}
               placeholder="Paste a model file"/>
-            <input 
-              type="submit" 
-              value="Load Model" 
-              className='btn btn-primary'/>
           </div>
         </form>
       </Tab.Pane>) },
        {menuItem: 'Import from URL', render: () => (<Tab.Pane>
-        <form onSubmit={this.handleUrlSubmit.bind(this)}>
+        <form>
           <div className="ui form">
             <input type="text"
               value={this.state.modelUrl} 
               onChange={this.handleUrlChange.bind(this)}
               className={'form-control'}
               placeholder="https://"/>
-            <input 
-              type="submit" 
-              value="Load Model"
-              className='btn btn-primary'/>
           </div>
         </form>
       </Tab.Pane>) },
     ]
-
-    let declSelection = null;
-    if(this.state.types.length > 0){
-      declSelection = (<div className="">
-        <p>Choose a type from this dropdown to generate a form</p>
-        <div className='field'>
-          <label>Declaration Selection</label>
-          <select className='ui fluid dropdown' 
-            onChange={this.handleDeclarationSelectionChange.bind(this)}
-            value={this.state.fqn}>
-            {this.state.types.map((type)=>{
-              return <option key={type.getFullyQualifiedName()} value={type.getFullyQualifiedName()}>{type.getFullyQualifiedName()}</option>
-            })}
-          </select>
-      </div>
-      <div className="ui segment">
-        <h2>Form</h2>
-        <ConcertoForm 
-          model={fqn}
-          generator={generator}
-        />
-      </div>
-    </div>
-    );
-    }
         
     return (
       <div className="App container ui form">
@@ -165,7 +117,28 @@ class App extends Component {
         <p>This tool demonstrates the <em>concerto-form</em> library to generate a form from a Hyperledger Composer, Concerto model.</p>
         <p>This demo produces a ReactJS form that is styled with Semantic UI.</p>
         <Tab panes={panes} />         
-       {declSelection}
+        <p>Choose a type from this dropdown to generate a form</p>
+        <div className='field'>
+          <label>Declaration Selection</label>
+          <select className='ui fluid dropdown' 
+            onChange={this.handleDeclarationSelectionChange.bind(this)}
+            value={this.state.fqn}>
+            {this.state.types.map((type)=>{
+              const fqn = type.getFullyQualifiedName();
+              return <option key={fqn} value={fqn}>{fqn}</option>
+            })}
+          </select>
+        </div>
+        <div className="ui segment">
+          <h2>Form</h2>
+          <div >
+            <ConcertoForm ref={this.form} onModelChange={this.onModelChange}
+              model={this.state.fqn}
+              modelFile={this.state.modelFile}
+              modelUrl={this.state.modelUrl}
+            />
+          </div>        
+        </div>
       </div>
     );
   }

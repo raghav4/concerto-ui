@@ -18,6 +18,8 @@ const jsonpath = require('jsonpath');
 const ReactFormVisitor = require('concerto-form-react').ReactFormVisitor;
 const {Message} = require('semantic-ui-react');
 const PropTypes = require('prop-types');
+const {FormGenerator} = require('concerto-form-core');
+
 
 let options = {
   customClasses : {
@@ -40,10 +42,13 @@ class ConcertoForm extends Component {
     super(props);
 
     this.onChange = this.onChange.bind(this);
+
     this.state = {
       json: null,
       form: null,
+      types: [],
     };
+
     options = Object.assign(options, {
       state: this.state,
       onChange: (e, key) => {
@@ -56,6 +61,22 @@ class ConcertoForm extends Component {
         this.removeElement(e, key, index);
       },
     });
+
+    this.generator = new FormGenerator();
+  }
+
+  async loadModelFile(file, type) {
+    try {
+      if  (type === 'text') {
+        await this.generator.loadFromText(file);
+      } else if (type === 'url') {
+        await this.generator.loadFromUrl(file);
+      }
+      this.setState({types: this.generator.getTypes()});
+      this.props.onModelChange(this.state.types);
+    } catch (error) {
+      this.setState({warning: `Invalid Model File: ${error.message}`});
+    }
   }
 
   componentWillReceiveProps(nextProps) {
@@ -63,10 +84,26 @@ class ConcertoForm extends Component {
     if (nextProps.model !== this.props.model) {
       this.renderForm(nextProps.model, true);
     }
+
+    if (nextProps.modelFile !== this.props.modelFile) {
+      this.loadModelFile(nextProps.modelFile, 'text');
+      if(nextProps.model){
+        this.renderForm(nextProps.model, true);
+      }
+    }
+
+    if (nextProps.modelUrl !== this.props.modelUrl) {
+      this.loadModelFile(nextProps.modelUrl, 'url');
+      if(nextProps.model){
+        this.renderForm(nextProps.model, true);
+      }
+    }
   }
 
   componentDidMount(){
-    this.renderForm(this.props.model);
+    if(this.props.model){
+      this.renderForm(this.props.model);
+    }
   }
 
   removeElement(e, key, index){
@@ -86,24 +123,26 @@ class ConcertoForm extends Component {
   onChange(e, key) {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     jsonpath.value(this.state.json, key, value);
-    this.setState({warning: this.props.generator.validateInstance(this.state.json) });
+    this.setState({warning: this.generator.validateInstance(this.state.json) });
 
     this.renderForm(this.props.model);
   }
 
   renderForm(model, reset){
-    if(this.props.generator){
-      options.state = this.state;
-      if(reset){
-        options.state = {
-          json: null,
-          form: null,
-        };
-      }
-      const {form, json} = this.props.generator.generateHTML(model, options);
-      this.setState({form, json});
+    options.state = this.state;
+    if(reset){
+      options.state = {
+        json: null,
+        form: null,
+      };
+    }
+    try {
+      const {form, json} = this.generator.generateHTML(model, options);
+      this.setState({form, json, warning: null});
 
       return {form, json};
+    } catch (error) {
+      this.setState({warning: `Invalid Model File: ${error.message}`});
     }
   }
 
@@ -139,8 +178,10 @@ class ConcertoForm extends Component {
 }
 
 ConcertoForm.propTypes = {
-  generator: PropTypes.object.isRequired,
+  modelFile: PropTypes.string,
+  modelUrl: PropTypes.string,
   model: PropTypes.string.isRequired,
+  onModelChange: PropTypes.func.isRequired,
 };
 
 module.exports = ConcertoForm;
