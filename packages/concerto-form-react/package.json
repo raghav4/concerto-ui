@@ -1,6 +1,6 @@
 {
   "name": "concerto-form-react",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Hyperledger Composer Form for generating a web form from a composer modeling language type",
   "engines": {
     "node": ">=8",
@@ -12,7 +12,7 @@
     "babel-core": "^7.0.0-bridge.0",
     "body-parser": "^1.18.3",
     "composer-concerto": "^0.60",
-    "concerto-form-core": "^0.1.12",
+    "concerto-form-core": "^0.2.0",
     "debug": "2.6.2",
     "jsonpath": "^1.0.0",
     "prop-types": "^15.6.2",
