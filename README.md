@@ -21,8 +21,7 @@ Packages:
 
 ### More Information
 
-Modeling Language | Hyperledger Composer: https://hyperledger.github.io/composer/reference/cto_language.html
-GitHub - https://github.com/hyperledger/composer-concerto
+Concerto Modeling Language | https://github.com/hyperledger/composer-concerto
 
 ## What does this do
 
@@ -30,13 +29,6 @@ GitHub - https://github.com/hyperledger/composer-concerto
 
 - Ask a question on [Stack Overflow](http://stackoverflow.com/questions/tagged/hyperledger-composer)
 - Chat on the Rocket.Chat [discussion channels](https://chat.hyperledger.org/channel/composer)
-
-Suggested reading list is:
-
-- [Introduction](https://hyperledger.github.io/composer/latest/introduction/introduction.html)
-- [Introduction Video](https://www.youtube.com/watch?v=fdFUsrsv5iw&t=23s)
-- [Quick Start](https://hyperledger.github.io/composer/latest/installing/installing-index.html)
-- [Tutorials](https://hyperledger.github.io/composer/latest/tutorials/tutorials.html)
 
 ## Getting started
 
@@ -55,24 +47,13 @@ lerna bootstrap
 Run the demo app and experiment with the form generator
 
 ```
+cd packages/concerto-form-react/
+npm run build
+cd ../..
+
 cd packages/concerto-form-demo
 npm run start
 ```
-
-
-
-## Getting in touch
-
-If you have a *question on using Hyperledger Composer*
-  - Rocket.Chat [discussion channels](https://chat.hyperledger.org/channel/composer)
-  - [Stack Overflow](http://stackoverflow.com/questions/tagged/hyperledger-composer), where the question should be tagged with 'hyperledger-composer'.
-
-If you have found a defect or want to raise a feature requests
-  - All tracked on GitHub - please read [how to raise](./contrib-notes/raising-issues.md)
-
-If you want to contribute to the develop of Hyperledger Composer
-  - Come introduce yourself on the contributors [RocketChat channel](https://chat.hyperledger.org/channel/composer-dev)
-  - Please read the [contributing guide](./CONTRIBUTING.md)
 
 ## License <a name="license"></a>
 Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Hyperledger Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
