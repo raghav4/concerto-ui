@@ -47,10 +47,6 @@ lerna bootstrap
 Run the demo app and experiment with the form generator
 
 ```
-cd packages/concerto-form-react/
-npm run build
-cd ../..
-
 cd packages/concerto-form-demo
 npm run start
 ```
