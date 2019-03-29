@@ -42,7 +42,7 @@ class App extends Component {
 
       // Rendering options
       options: {
-        includeOptionalFields: false,
+        includeOptionalFields: true,
 
         // The default values for a generated form if a JSON serialization isn't provided
         // 'sample' uses random well-typed values
@@ -56,39 +56,6 @@ class App extends Component {
 
   async handleDeclarationSelectionChange(event) {
     this.setState({fqn: event.target.value});
-  }
-
-  loadTestModel(event){
-    this.setState({modelFile:  `
-namespace org.hyperledger.concerto.form.test
-
-concept Foo {
-  o String s
-  o Boolean b optional
-  o DateTime dt
-  o Integer i
-  o Double d
-  o Bar bar
-  o String[] ss
-  o Boolean[] bs
-  o DateTime[] dts
-  o Bar[] bars
-  o Nums n
-}
-
-enum Nums {
-  o ONE
-  o TWO
-}
-
-abstract concept Bar {
-  o String s
-}
-
-concept Baz extends Bar{
-  o String t
-}
-      `});
   }
 
   handleTextAreaChange(event) {
@@ -118,11 +85,6 @@ concept Baz extends Bar{
               onChange={this.handleTextAreaChange.bind(this)}
               className={'form-control Text-area'}
               placeholder="Paste a model file"/>
-            <input
-              type="button"
-              value="Load Test Model"
-              onClick={this.loadTestModel.bind(this)}
-              className='btn btn-primary'/>
           </div>
         </form>
       </Tab.Pane>) },

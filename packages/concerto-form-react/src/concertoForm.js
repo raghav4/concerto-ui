@@ -69,10 +69,11 @@ class ConcertoForm extends Component {
       } else if (type === 'url') {
         await this.generator.loadFromUrl(file);
       }
-      this.setState({types: this.generator.getTypes()}, () => {
+      this.setState({types: this.generator.getTypes(), warning: false}, () => {
         this.props.onModelChange(this.state.types, this.state.json);
       });
     } catch (error) {
+      console.error(error);
       this.setState({warning: `Invalid Model File: ${error.message}`});
     }
   }

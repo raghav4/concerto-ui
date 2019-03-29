@@ -9,7 +9,6 @@
   "private": false,
   "dependencies": {
     "axios": "^0.18.0",
-    "babel-core": "^7.0.0-bridge.0",
     "body-parser": "^1.18.3",
     "composer-concerto": "^0.60",
     "concerto-form-core": "^0.2.0",
@@ -33,6 +32,7 @@
     "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
     "test": "jest",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
+    "postinstall": "npm run build",
     "build": "babel ./src -d ./lib"
   },
   "keywords": [
@@ -48,7 +48,6 @@
     "@babel/preset-react": "^7.0.0",
     "ajv": "6.1.1",
     "babel-jest": "^23.6.0",
-    "babel-preset-latest": "6.24.1",
     "babelify": "7.3.0",
     "browserfs": "1.1.0",
     "coveralls": "^3.0.1",
