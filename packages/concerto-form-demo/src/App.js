@@ -26,7 +26,7 @@ class App extends Component {
 
     this.state = {
       // The JSON serialization of the model
-      json: {},
+      // json: {},
 
       // The Fully Qualified Name of the type that the form generates
       fqn: '',
@@ -52,13 +52,18 @@ class App extends Component {
     };
 
     this.onModelChange = this.onModelChange.bind(this);
+    this.onValueChange = this.onValueChange.bind(this);
   }
 
-  async handleDeclarationSelectionChange(event) {
+  handleDeclarationSelectionChange(event) {
     this.setState({fqn: event.target.value});
   }
 
-  handleTextAreaChange(event) {
+  handleJsonTextAreaChange(event) {
+    this.setState({json: JSON.parse(event.target.value)});
+  }
+
+  handleModelTextAreaChange(event) {
     this.setState({modelFile: event.target.value});
   }
 
@@ -66,13 +71,18 @@ class App extends Component {
     this.setState({modelUrl: event.target.value});
   }
 
-  onModelChange(types, json){
-    const state = {json};
+  onModelChange(types){
     if(types !== this.state.types && types.length > 0){
-      state.types = types;
-      state.fqn = types[0].getFullyQualifiedName();
+      this.setState({
+        types,
+        fqn:types[0].getFullyQualifiedName(),
+        json: null
+      });
     }
-    this.setState(state);
+  }
+
+  onValueChange(json){
+    this.setState({ json });
   }
 
   render() {
@@ -82,7 +92,7 @@ class App extends Component {
           <div className="ui form">
             <textarea
               value={this.state.modelFile}
-              onChange={this.handleTextAreaChange.bind(this)}
+              onChange={this.handleModelTextAreaChange.bind(this)}
               className={'form-control Text-area'}
               placeholder="Paste a model file"/>
           </div>
@@ -122,7 +132,9 @@ class App extends Component {
         <div className="ui segment">
           <h2>Form</h2>
           <div >
-            <ConcertoForm ref={this.form} onModelChange={this.onModelChange}
+            <ConcertoForm ref={this.form}
+              onModelChange={this.onModelChange}
+              onValueChange={this.onValueChange}
               model={this.state.fqn}
               modelFile={this.state.modelFile}
               modelUrl={this.state.modelUrl}
@@ -134,7 +146,12 @@ class App extends Component {
         <div className="ui segment">
           <h2>JSON</h2>
           <div className='ui form field'>
-            <pre>{JSON.stringify(this.state.json, null, 2)}</pre>
+          {this.state.json &&
+          <textarea
+            value={JSON.stringify(this.state.json, null, 2)}
+            onChange={this.handleJsonTextAreaChange.bind(this)}
+          />
+          }
           </div>
         </div>
       </div>

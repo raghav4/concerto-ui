@@ -84,7 +84,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
     component = (<div className={styles.field} key={id}>
           <select className={styles.enumeration}
             value={value}
-            onChange={(e)=>parameters.onChange(e, key)}
+            onChange={(e)=>parameters.onFieldValueChange(e, key)}
             key={key} >
           {enumDeclaration.getProperties().map((property) => {
             return property.accept(this,parameters);
@@ -126,7 +126,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                             <input type="checkbox"
                             checked={value}
                             value={value}
-                            onChange={(e)=>parameters.onChange(e, key)}
+                            onChange={(e)=>parameters.onFieldValueChange(e, key)}
                             key={key} />
                             <label/>
                         </div>
@@ -136,7 +136,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                         <input type={this.toFieldType(field.getType())}
                             className={styles.input}
                             value={new Date(value).toDatetimeLocal()}
-                            onChange={(e)=>parameters.onChange(e, key)}
+                            onChange={(e)=>parameters.onFieldValueChange(e, key)}
                             key={key} />
                     </div>);
           } else {
@@ -144,7 +144,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                         <input type={this.toFieldType(field.getType())}
                             className={styles.input}
                             value={value}
-                            onChange={(e)=>parameters.onChange(e, key)}
+                            onChange={(e)=>parameters.onFieldValueChange(e, key)}
                             key={key} />
                     </div>);
           }
@@ -201,7 +201,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                       <input type="checkbox"
                       checked={value}
                       value={value}
-                      onChange={(e)=>parameters.onChange(e, key)}
+                      onChange={(e)=>parameters.onFieldValueChange(e, key)}
                       key={key} />
                       <label/>
                   </div>
@@ -212,7 +212,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                   <input type={this.toFieldType(field.getType())}
                       className={styles.input}
                       value={new Date(value).toDatetimeLocal()}
-                      onChange={(e)=>parameters.onChange(e, key)}
+                      onChange={(e)=>parameters.onFieldValueChange(e, key)}
                       key={key} />
               </div>);
       } else {
@@ -221,7 +221,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                   <input type={this.toFieldType(field.getType())}
                       className={styles.input}
                       value={value}
-                      onChange={(e)=>parameters.onChange(e, key)}
+                      onChange={(e)=>parameters.onFieldValueChange(e, key)}
                       key={key} />
               </div>);
       }
@@ -274,7 +274,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                 type='text'
                 className={styles.input}
                 value={value}
-                onChange={(e)=>parameters.onChange(e, key)}
+                onChange={(e)=>parameters.onFieldValueChange(e, key)}
                 key={key}
                 />
         </div>);
