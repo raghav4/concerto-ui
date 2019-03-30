@@ -27,16 +27,17 @@ class ConcertoForm extends Component {
   constructor(props) {
     super(props);
 
-    this.onChange = this.onChange.bind(this);
+    this.onFieldValueChange = this.onFieldValueChange.bind(this);
 
     this.state = {
-      json: null,
-      form: null,
-      types: [],
+      value: null, // A mutable copy of this.props.json
+      // This is needed so that we can use the jsonpath library to change object properties by key
+      // using the jsonpath module, without modifying the props object
+      form: props.form,
+      types: []
     };
 
     this.options = Object.assign({
-      state: this.state,
       visitor: new ReactFormVisitor(),
       // CSS Styling, specify classnames
       customClasses : {
@@ -48,8 +49,8 @@ class ConcertoForm extends Component {
         boolean: 'ui toggle checkbox',
         button: 'ui fluid button'
       },
-      onChange: (e, key) => {
-        this.onChange(e, key);
+      onFieldValueChange: (e, key) => {
+        this.onFieldValueChange(e, key);
       },
       addElement: (e, key, field) => {
         this.addElement(e, key, field);
@@ -59,7 +60,7 @@ class ConcertoForm extends Component {
       },
     }, props.options);
 
-    this.generator = new FormGenerator();
+    this.generator = new FormGenerator(this.options);
   }
 
   async loadModelFile(file, type) {
@@ -70,7 +71,7 @@ class ConcertoForm extends Component {
         await this.generator.loadFromUrl(file);
       }
       this.setState({types: this.generator.getTypes(), warning: false}, () => {
-        this.props.onModelChange(this.state.types, this.state.json);
+        this.props.onModelChange(this.state.types);
       });
     } catch (error) {
       console.error(error);
@@ -79,76 +80,70 @@ class ConcertoForm extends Component {
   }
 
   async componentWillReceiveProps(nextProps) {
+    // console.log(nextProps, this.props);
     // Any time props.model changes, update state.
     if (nextProps.model !== this.props.model) {
-      this.renderForm(nextProps.model, true);
+      this.renderForm(nextProps.model);
+      return;
     }
 
-    if (nextProps.json !== this.props.json && this.props.model) {
-      this.setState({json: nextProps.json}, () => {
-        this.renderForm(this.props.model);
+    if (nextProps.json !== this.state.value && this.props.model) {
+      this.setState({ value: nextProps.json}, () =>{
+        this.renderForm(nextProps.model);
       });
+      return;
     }
 
     if (nextProps.modelFile !== this.props.modelFile) {
       await this.loadModelFile(nextProps.modelFile, 'text');
       if(nextProps.model){
-        this.renderForm(nextProps.model, true);
+        this.renderForm(nextProps.model);
+        return;
       }
-      return;
     }
 
     if (nextProps.modelUrl !== this.props.modelUrl) {
       await this.loadModelFile(nextProps.modelUrl, 'url');
       if(nextProps.model){
-        this.renderForm(nextProps.model, true);
+        this.renderForm(nextProps.model);
+        return;
       }
-      return;
-    }
-  }
-
-  componentDidMount(){
-    if(this.props.model){
-      this.setState({json: this.props.json});
-      this.renderForm(this.props.model);
     }
   }
 
   removeElement(e, key, index){
-    const array = jsonpath.value(this.state.json, key);
+    const array = jsonpath.value(this.state.value, key);
     array.splice(index, 1);
     this.renderForm(this.props.model);
+    this.props.onValueChange(this.state.value);
   }
 
   addElement(e, key, value){
-    const array = jsonpath.value(this.state.json, key);
-    jsonpath.value(this.state.json,`${key}.${array.length}`, value);
+    const array = jsonpath.value(this.state.value, key);
+    jsonpath.value(this.state.value,`${key}.${array.length}`, value);
     this.renderForm(this.props.model);
+    this.props.onValueChange(this.state.value);
   }
 
-  onChange(e, key) {
+  onFieldValueChange(e, key) {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-    jsonpath.value(this.state.json, key, value);
-    this.setState({warning: this.generator.validateInstance(this.state.json) }, ()=>{
+    jsonpath.value(this.state.value, key, value);
+    this.setState({warning: this.generator.validateInstance(this.state.value) }, ()=>{
       this.renderForm(this.props.model);
+      this.props.onValueChange(this.state.value);
     });
   }
 
-  renderForm(model, reset){
-    this.options.state = this.state;
-    if(reset){
-      this.options.state = {
-        json: null,
-        form: null,
-      };
-    }
+  renderForm(model){
     try {
-      const {form, json} = this.generator.generateHTML(model, this.options);
-      this.setState({form, json, warning: null}, ()=> {
-        this.props.onModelChange(this.state.types, json);
-      });
-      return {form, json};
+      const {form, json} = this.generator.generateHTML(model, this.state.value);
+      this.setState({form, warning: null});
+      if(this.state.value !== json) {
+        this.props.onValueChange(json);
+      }
+      return {form};
     } catch (error) {
+      console.error(error);
       this.setState({warning: `Invalid Model File: ${error.message}`});
     }
   }
@@ -173,8 +168,9 @@ ConcertoForm.propTypes = {
   modelFile: PropTypes.string,
   modelUrl: PropTypes.string,
   model: PropTypes.string.isRequired,
-  onModelChange: PropTypes.func.isRequired,
   json: PropTypes.object,
+  onModelChange: PropTypes.func.isRequired,
+  onValueChange: PropTypes.func.isRequired,
   options: PropTypes.object,
 };
 
