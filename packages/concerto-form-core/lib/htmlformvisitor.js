@@ -125,7 +125,7 @@ class HTMLFormVisitor {
      */
     visitField(field, parameters) {
         const styles = parameters.customClasses;
-        const div = `<div class="${styles.field}">`;
+        const div = `<div class="${styles.field} ${parameters.disabled ? 'disabled': ''}">`;
         const label = `<label for="${field.getName()}">${field.getName()}:</label>`;
         parameters.fileWriter.writeLine(1, div);
         parameters.fileWriter.writeLine(2, label);

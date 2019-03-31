@@ -115,13 +115,16 @@ class ReactFormVisitor extends HTMLFormVisitor {
     if(!field.isOptional()){
       style += ' ' + styles.required;
     }
+    if(parameters.disabled){
+      style += ' disabled';
+    }
     if (field.isArray()) {
       let arrayField = (field, parameters) => {
         let key = jsonpath.stringify(parameters.stack);
         let value = jsonpath.value(parameters.json,key);
         if (field.isPrimitive()){
           if(field.getType() === 'Boolean'){
-            return(<div className={styles.field} key={field.getName()+'_wrapper'}>
+            return(<div className={styles} key={field.getName()+'_wrapper'}>
                         <div className={styles.boolean}>
                             <input type="checkbox"
                             checked={value}
@@ -132,7 +135,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                         </div>
                     </div>);
           } else if(this.toFieldType(field.getType()) === 'datetime-local'){
-            return (<div className={styles.field} key={field.getName()+'_wrapper'}>
+            return (<div className={style} key={field.getName()+'_wrapper'}>
                         <input type={this.toFieldType(field.getType())}
                             className={styles.input}
                             value={new Date(value).toDatetimeLocal()}
@@ -140,7 +143,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                             key={key} />
                     </div>);
           } else {
-            return (<div className={styles.field} key={field.getName()+'_wrapper'}>
+            return (<div className={style} key={field.getName()+'_wrapper'}>
                         <input type={this.toFieldType(field.getType())}
                             className={styles.input}
                             value={value}
@@ -195,7 +198,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
             </div>);
     } else if (field.isPrimitive()) {
       if(field.getType() === 'Boolean'){
-        component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
+        component = (<div className={style} key={field.getName()+'_wrapper'}>
                   <label>{Utilities.normalizeLabel(field.getName())}</label>
                   <div className={styles.boolean}>
                       <input type="checkbox"
@@ -207,7 +210,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                   </div>
               </div>);
       } else if(this.toFieldType(field.getType()) === 'datetime-local'){
-        component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
+        component = (<div className={style} key={field.getName()+'_wrapper'}>
                   <label>{Utilities.normalizeLabel(field.getName())}</label>
                   <input type={this.toFieldType(field.getType())}
                       className={styles.input}
@@ -216,7 +219,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
                       key={key} />
               </div>);
       } else {
-        component = (<div className={styles.field} key={field.getName()+'_wrapper'}>
+        component = (<div className={style} key={field.getName()+'_wrapper'}>
                   <label>{Utilities.normalizeLabel(field.getName())}</label>
                   <input type={this.toFieldType(field.getType())}
                       className={styles.input}
