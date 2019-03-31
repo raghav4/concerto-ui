@@ -1,6 +1,6 @@
 {
   "name": "concerto-form-demo",
-  "version": "0.3.4",
+  "version": "0.3.5",
   "description": "Hyperledger Composer Form, code for generating a web form from a composer modeling language type",
   "engines": {
     "node": ">=8",
@@ -9,8 +9,8 @@
   "private": true,
   "dependencies": {
     "composer-concerto": "^0.70.1",
-    "concerto-form-core": "^0.3.4",
-    "concerto-form-react": "^0.3.4",
+    "concerto-form-core": "^0.3.5",
+    "concerto-form-react": "^0.3.5",
     "jsonpath": "^1.0.0",
     "react": "^16.4.1",
     "react-bootstrap": "^0.32.1",
