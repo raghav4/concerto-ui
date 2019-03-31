@@ -13,8 +13,7 @@
 		"bootstrap": "lerna bootstrap",
 		"pretest": "npm run depcheck & npm run licchk",
 		"licchk": "license-check-and-add",
-		"test": "lerna run test",
-		"pkgbump": "node ./scripts/pkgbump.js"
+		"test": "lerna run test"
 	},
 	"repository": {
 		"type": "git",
