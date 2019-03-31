@@ -267,6 +267,9 @@ class ReactFormVisitor extends HTMLFormVisitor {
     if(!relationship.isOptional()){
       fieldStyle += ' ' + styles.required;
     }
+    if(parameters.disabled){
+      fieldStyle += ' disabled';
+    }
 
     const key = jsonpath.stringify(parameters.stack);
     const value = jsonpath.value(parameters.json,key);
@@ -276,7 +279,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
             <input
                 type='text'
                 className={styles.input}
-                value={value}
+                value={JSON.stringify(value)}
                 onChange={(e)=>parameters.onFieldValueChange(e, key)}
                 key={key}
                 />

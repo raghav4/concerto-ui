@@ -85,32 +85,30 @@ class ConcertoForm extends Component {
   }
 
   async componentWillReceiveProps(nextProps) {
-    // Any time props.model changes, update state.
-    if (nextProps.model !== this.props.model) {
-      this.renderForm(nextProps.model);
-      return;
-    }
+      // The form can only be rendered once a model file has been loaded which happens on componentDidMount
+    if(this.loaded){
 
-    if (nextProps.json !== this.state.value && this.props.model) {
-      this.setState({ value: nextProps.json}, () =>{
-        this.renderForm(nextProps.model);
-      });
-      return;
-    }
-
-    if (nextProps.modelFile !== this.props.modelFile) {
-      await this.loadModelFile(nextProps.modelFile, 'text');
-      if(nextProps.model){
-        this.renderForm(nextProps.model);
+      if (nextProps.json !== this.state.value && this.props.model) {
+        this.setState({ value: nextProps.json}, () =>{
+          this.renderForm(nextProps.model);
+        });
         return;
       }
-    }
 
-    if (nextProps.modelUrl !== this.props.modelUrl) {
-      await this.loadModelFile(nextProps.modelUrl, 'url');
-      if(nextProps.model){
-        this.renderForm(nextProps.model);
-        return;
+      if (nextProps.modelFile !== this.props.modelFile) {
+        await this.loadModelFile(nextProps.modelFile, 'text');
+        if(nextProps.model){
+          this.renderForm(nextProps.model);
+          return;
+        }
+      }
+
+      if (nextProps.modelUrl !== this.props.modelUrl) {
+        await this.loadModelFile(nextProps.modelUrl, 'url');
+        if(nextProps.model){
+          this.renderForm(nextProps.model);
+          return;
+        }
       }
     }
   }
@@ -126,6 +124,7 @@ class ConcertoForm extends Component {
       }
 
       this.renderForm(this.props.model);
+      this.loaded = true;
     }
   }
 
@@ -153,7 +152,7 @@ class ConcertoForm extends Component {
   }
 
   renderForm(model){
-    if (model) {
+    if (model && this.props.json) {
       try {
         const {form, json} = this.generator.generateHTML(model, this.props.json);
         this.setState({form, warning: null});
@@ -187,10 +186,7 @@ ConcertoForm.propTypes = {
   modelFile: PropTypes.string,
   modelUrl: PropTypes.string,
   model: PropTypes.string,
-  json: PropTypes.oneOfType([
-    PropTypes.array,
-    PropTypes.object,
-  ]),
+  json: PropTypes.object,
   onModelChange: PropTypes.func.isRequired,
   onValueChange: PropTypes.func.isRequired,
   options: PropTypes.object,
