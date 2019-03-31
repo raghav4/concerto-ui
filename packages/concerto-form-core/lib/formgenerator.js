@@ -33,9 +33,10 @@ class FormGenerator {
     *
     * @param {object} options - form options
     * @param {boolean} options.includeOptionalFields - if true, optional fields will be generated
-    * @param {boolean} options.includeSampleData - The default values for a generated form if a JSON serialization isn't provided
+    * @param {boolean} options.includeSampleData - if set, this defines the kind of default values for a generated form
     * 'sample' uses random well-typed values
     * 'empty' provides sensible empty values
+    * @param {object} options.disabled - if true, all form fields will be disabled
     * @param {object} options.visitor - a class that extends HTMLFormVisitor that generates HTML, defaults to HTMLFormVisitor
     * @param {object} options.customClasses - a custom CSS classes that can be applied to generated HTML
     * @param {boolean} options.wrapHtmlForm - if true, the result will be wrapped in a <form> tag
@@ -54,6 +55,7 @@ class FormGenerator {
         }`, 'org.accordproject.base.cto', false, true);
 
         this.options = options;
+
         // this.modelManager = options.modelManager ? new options.modelManager() : new ModelManager();
         this.factory = new Factory(this.modelManager);
         this.serializer = new Serializer(this.factory, this.modelManager);
@@ -154,6 +156,10 @@ class FormGenerator {
             throw new Error('Cannot generate forms for abstract types');
         }
 
+        if(!json && !this.options.includeSampleData){
+            throw new Error('Cannot generate form values when the provided JSON is null and the component configured not to generate sample data.');
+        }
+
         const ns = classDeclaration.getNamespace();
         const name = classDeclaration.getName();
         const factoryOptions =  {
@@ -162,7 +168,7 @@ class FormGenerator {
         };
 
         let newJSON = json;
-        if(!json){
+        if(!newJSON){
             if(classDeclaration.isConcept()){
                 const concept = this.factory.newConcept(ns, name, factoryOptions);
                 newJSON = this.serializer.toJSON(concept);

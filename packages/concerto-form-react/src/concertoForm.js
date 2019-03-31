@@ -15,7 +15,7 @@
 const React = require('react');
 const Component = require('react').Component;
 const jsonpath = require('jsonpath');
-const ReactFormVisitor = require('concerto-form-react').ReactFormVisitor;
+const ReactFormVisitor = require('./reactformvisitor');
 const {Message} = require('semantic-ui-react');
 const PropTypes = require('prop-types');
 const {FormGenerator} = require('concerto-form-core');
@@ -30,14 +30,20 @@ class ConcertoForm extends Component {
     this.onFieldValueChange = this.onFieldValueChange.bind(this);
 
     this.state = {
-      value: null, // A mutable copy of this.props.json
+      // A mutable copy of this.props.json
       // This is needed so that we can use the jsonpath library to change object properties by key
       // using the jsonpath module, without modifying the props object
-      form: props.form,
+      value: null,
+
+      form: null,
       types: []
     };
 
+    // Default values which can be overridden by parent components
     this.options = Object.assign({
+      includeOptionalFields: true,
+      includeSampleData: null,
+      disabled: props.readOnly,
       visitor: new ReactFormVisitor(),
       // CSS Styling, specify classnames
       customClasses : {
@@ -59,7 +65,6 @@ class ConcertoForm extends Component {
         this.removeElement(e, key, index);
       },
     }, props.options);
-
     this.generator = new FormGenerator(this.options);
   }
 
@@ -80,7 +85,6 @@ class ConcertoForm extends Component {
   }
 
   async componentWillReceiveProps(nextProps) {
-    // console.log(nextProps, this.props);
     // Any time props.model changes, update state.
     if (nextProps.model !== this.props.model) {
       this.renderForm(nextProps.model);
@@ -111,6 +115,20 @@ class ConcertoForm extends Component {
     }
   }
 
+  async componentDidMount(){
+    if(this.props.model && this.props.json){
+      if (this.props.modelFile) {
+        await this.loadModelFile(this.props.modelFile, 'text');
+      }
+
+      if (this.props.modelUrl) {
+        await this.loadModelFile(this.props.modelFile, 'url');
+      }
+
+      this.renderForm(this.props.model);
+    }
+  }
+
   removeElement(e, key, index){
     const array = jsonpath.value(this.state.value, key);
     array.splice(index, 1);
@@ -135,22 +153,23 @@ class ConcertoForm extends Component {
   }
 
   renderForm(model){
-    try {
-      const {form, json} = this.generator.generateHTML(model, this.state.value);
-      this.setState({form, warning: null});
-      if(this.state.value !== json) {
-        this.props.onValueChange(json);
+    if (model) {
+      try {
+        const {form, json} = this.generator.generateHTML(model, this.props.json);
+        this.setState({form, warning: null});
+        if(this.state.value !== json) {
+          this.props.onValueChange(json);
+        }
+        return form;
+      } catch (error) {
+        console.error(error);
+        this.setState({warning: `Invalid Model File: ${error.message}`});
       }
-      return {form};
-    } catch (error) {
-      console.error(error);
-      this.setState({warning: `Invalid Model File: ${error.message}`});
     }
   }
 
   render() {
     let warning = null;
-
     if(this.state.warning){
       warning = (<Message visible warning>
         <p>{this.state.warning}</p>
@@ -167,11 +186,15 @@ class ConcertoForm extends Component {
 ConcertoForm.propTypes = {
   modelFile: PropTypes.string,
   modelUrl: PropTypes.string,
-  model: PropTypes.string.isRequired,
-  json: PropTypes.object,
+  model: PropTypes.string,
+  json: PropTypes.oneOfType([
+    PropTypes.array,
+    PropTypes.object,
+  ]),
   onModelChange: PropTypes.func.isRequired,
   onValueChange: PropTypes.func.isRequired,
   options: PropTypes.object,
+  readOnly: PropTypes.bool,
 };
 
 module.exports = ConcertoForm;
