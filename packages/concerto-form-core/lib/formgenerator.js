@@ -69,7 +69,7 @@ class FormGenerator {
         this.modelManager.clearModelFiles();
         const model = await fs.readFileSync(path, 'utf8');
         this.modelManager.addModelFile(model, undefined, true);
-        await this.modelManager.updateExternalModels();
+        return this.modelManager.updateExternalModels();
     }
 
     /**
@@ -79,7 +79,7 @@ class FormGenerator {
     async loadFromText(text) {
         this.modelManager.clearModelFiles();
         this.modelManager.addModelFile(text, undefined, true);
-        await this.modelManager.updateExternalModels();
+        return this.modelManager.updateExternalModels();
     }
 
     /**
@@ -98,7 +98,7 @@ class FormGenerator {
             let text = await response.data.toString('utf8');
             this.modelManager.clearModelFiles();
             this.modelManager.addModelFile(text, undefined, true);
-            await this.modelManager.updateExternalModels();
+            return this.modelManager.updateExternalModels();
         } catch (error) {
             if (error.response) {
                 throw new Error('Request to URL ['+ url +'] returned with error code: ' + error.response.status);
@@ -143,6 +143,7 @@ class FormGenerator {
     * @return {object} the generated HTML string
     */
     generateHTML (type, json) {
+        console.warn(type);
         const classDeclaration = this.modelManager.getType(type);
         if(!classDeclaration){
             throw new Error(type + ' not found');
