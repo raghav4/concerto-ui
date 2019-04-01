@@ -273,9 +273,6 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
     const key = jsonpath.stringify(parameters.stack);
     let value = jsonpath.value(parameters.json,key);
-    if(typeof value === 'object'){
-      value = JSON.stringify(value);
-    }
 
     const component = (<div className={fieldStyle} key={relationship.getName()}>
             <label>{Utilities.normalizeLabel(relationship.getName())}</label>
