@@ -97,10 +97,10 @@ class ConcertoForm extends Component {
     return { value: props.json ? Object.assign({},props.json): null, warning: null};
   }
 
-  async componentDidMount(){console.warn('componentDidMount');
+  async componentDidMount(){
     if (this.props.modelFile) {
       const types = await this.loadModelFile(this.props.modelFile, 'text');
-      if(types){console.warn(types);
+      if(types){
         this.setState({ types }, () => { this.props.onModelChange(types);});
       }
     }
