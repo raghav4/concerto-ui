@@ -149,9 +149,12 @@ class FormGenerator {
         if(!model || !type){
             return false;
         }
-        return this.modelManager.getSerializer().fromJSON(model).instanceOf(type);
+        try {
+            return this.modelManager.getSerializer().fromJSON(model).instanceOf(type);
+        } catch (error){
+            return false;
+        }
     }
-
 
     /**
     * @param {Object} type - The type from the model source to generate a JSON for
@@ -197,8 +200,6 @@ class FormGenerator {
     * @return {object} the generated HTML string
     */
     generateHTML (type, json) {
-        console.log(this.getTypes());
-
         const classDeclaration = this.modelManager.getType(type);
         if(!classDeclaration){
             throw new Error(type + ' not found');
