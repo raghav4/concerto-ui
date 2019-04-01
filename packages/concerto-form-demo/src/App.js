@@ -14,7 +14,7 @@
 
 import React, { Component } from 'react';
 import './App.css';
-import {ConcertoForm} from 'concerto-form-react';
+import { ConcertoForm } from 'concerto-form-react';
 import { Tab } from 'semantic-ui-react';
 
 class App extends Component {
@@ -25,9 +25,6 @@ class App extends Component {
     this.form = React.createRef();
 
     this.state = {
-      // The JSON serialization of the model
-      // json: {},
-
       // The Fully Qualified Name of the type that the form generates
       fqn: '',
 

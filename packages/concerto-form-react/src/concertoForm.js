@@ -16,7 +16,6 @@ const React = require('react');
 const Component = require('react').Component;
 const jsonpath = require('jsonpath');
 const ReactFormVisitor = require('./reactformvisitor');
-const {Message} = require('semantic-ui-react');
 const PropTypes = require('prop-types');
 const {FormGenerator} = require('concerto-form-core');
 
@@ -36,7 +35,8 @@ class ConcertoForm extends Component {
       value: null,
 
       form: null,
-      types: []
+      types: [],
+
     };
 
     // Default values which can be overridden by parent components
@@ -70,115 +70,109 @@ class ConcertoForm extends Component {
 
   async loadModelFile(file, type) {
     try {
+      let types;
       if  (type === 'text') {
-        await this.generator.loadFromText(file);
+        types = await this.generator.loadFromText(file);
       } else if (type === 'url') {
-        await this.generator.loadFromUrl(file);
+        types = await this.generator.loadFromUrl(file);
       }
-      this.setState({types: this.generator.getTypes(), warning: false}, () => {
-        this.props.onModelChange(this.state.types);
-      });
+      // this.props.onModelChange(types);
+      return types;
     } catch (error) {
       console.error(error);
-      this.setState({warning: `Invalid Model File: ${error.message}`});
     }
   }
 
-  async componentWillReceiveProps(nextProps) {
-      // The form can only be rendered once a model file has been loaded which happens on componentDidMount
-    if(this.loaded){
+  static getDerivedStateFromProps(props, state){
+    // const state = value = ;
+    // state.warning = null;
 
-      if (nextProps.json !== this.state.value && this.props.model) {
-        this.setState({ value: nextProps.json}, () =>{
-          this.renderForm(nextProps.model);
-        });
-        return;
-      }
+    // const valid = this.generator.isInstanceOf(this.state.value, this.props.model);
 
-      if (nextProps.modelFile !== this.props.modelFile) {
-        await this.loadModelFile(nextProps.modelFile, 'text');
-        if(nextProps.model){
-          this.renderForm(nextProps.model);
-          return;
-        }
-      }
+    // // console.warn(prevProps.model, this.props.model, this.state.value, !valid);
+    // if (!valid){
+    //   state.value = null;
+    //   this.props.onValueChange(null);
+    // }
+    return { value: props.json ? Object.assign({},props.json): null, warning: null};
+  }
 
-      if (nextProps.modelUrl !== this.props.modelUrl) {
-        await this.loadModelFile(nextProps.modelUrl, 'url');
-        if(nextProps.model){
-          this.renderForm(nextProps.model);
-          return;
-        }
+  async componentDidMount(){console.warn('componentDidMount');
+    if (this.props.modelFile) {
+      const types = await this.loadModelFile(this.props.modelFile, 'text');
+      if(types){console.warn(types);
+        this.setState({ types }, () => { this.props.onModelChange(types);});
       }
+    }
+
+    if (this.props.modelUrl) {
+      const types = await this.loadModelFile(this.props.modelFile, 'url');
+      if(types){
+        this.setState({ types }, () => { this.props.onModelChange(types);});
+      }
+    }
+
+    if(this.props.model && !this.state.value && this.options.includeSampleData){
+      this.setState({ value: this.generator.generateJSON(this.props.model)});
     }
   }
 
-  async componentDidMount(){
-    if(this.props.model && this.props.json){
-      if (this.props.modelFile) {
-        await this.loadModelFile(this.props.modelFile, 'text');
+  async componentDidUpdate(prevProps) {
+    if (prevProps.modelFile !== this.props.modelFile) {
+      const types = await this.loadModelFile(this.props.modelFile, 'text');
+      if(types){
+        this.setState({ types }, () => { this.props.onModelChange(types);});
       }
-
-      if (this.props.modelUrl) {
-        await this.loadModelFile(this.props.modelFile, 'url');
+    }
+    if (prevProps.modelUrl !== this.props.modelUrl) {
+      const types = await this.loadModelFile(this.props.modelUrl, 'url');
+      if(types){
+        this.setState({ types }, () => { this.props.onModelChange(types);});
       }
+    }
 
-      this.renderForm(this.props.model);
-      this.loaded = true;
+    if(this.props.model && !this.state.value && this.options.includeSampleData){
+      this.setState({ value: this.generator.generateJSON(this.props.model)});
     }
   }
 
   removeElement(e, key, index){
     const array = jsonpath.value(this.state.value, key);
     array.splice(index, 1);
-    this.renderForm(this.props.model);
     this.props.onValueChange(this.state.value);
   }
 
   addElement(e, key, value){
     const array = jsonpath.value(this.state.value, key);
     jsonpath.value(this.state.value,`${key}.${array.length}`, value);
-    this.renderForm(this.props.model);
     this.props.onValueChange(this.state.value);
   }
 
   onFieldValueChange(e, key) {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     jsonpath.value(this.state.value, key, value);
-    this.setState({warning: this.generator.validateInstance(this.state.value) }, ()=>{
-      this.renderForm(this.props.model);
-      this.props.onValueChange(this.state.value);
-    });
+    this.props.onValueChange(this.state.value);
   }
 
-  renderForm(model){
-    if (model && this.props.json) {
-      try {
-        const {form, json} = this.generator.generateHTML(model, this.props.json);
-        this.setState({form, warning: null});
-        if(this.state.value !== json) {
-          this.props.onValueChange(json);
-        }
-        return form;
-      } catch (error) {
-        console.error(error);
-        this.setState({warning: `Invalid Model File: ${error.message}`});
-      }
+  renderForm(){
+    if (this.props.model && this.state.value) {
+      const form = this.generator.generateHTML(this.props.model, this.state.value);
+
+      // // The generation step created some new JSON, so tell everyone about it
+      // if(this.state.value !== json) {
+      //   this.props.onValueChange(json);
+      // }
+      return form;
     }
+    return null;
   }
 
   render() {
-    let warning = null;
-    if(this.state.warning){
-      warning = (<Message visible warning>
-        <p>{this.state.warning}</p>
-      </Message>);
-    }
-
-    return (<form className="ui form">
-          {warning}
-          {this.state.form}
-        </form>);
+    return (
+        <form className="ui form">
+          {this.renderForm()}
+        </form>
+    );
   }
 }
 
