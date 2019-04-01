@@ -53,7 +53,14 @@ class App extends Component {
   }
 
   handleDeclarationSelectionChange(event) {
-    this.setState({fqn: event.target.value});
+    const state = {fqn: event.target.value};
+    if(this.state.json && !this.isInstanceOf(state.fqn, this.state.json)) {
+      state.json = this.generateEmptyJson(state.fqn);
+    }
+    if(!this.state.json) {
+      state.json = this.generateEmptyJson(state.fqn);
+    }
+    this.setState(state);
   }
 
   handleJsonTextAreaChange(event) {
@@ -68,13 +75,27 @@ class App extends Component {
     this.setState({modelUrl: event.target.value});
   }
 
+  generateEmptyJson(type) {
+    return this.form.current.generateJSON(type);
+  }
+
+  isInstanceOf(model, type) {
+    return this.form.current.isInstanceOf(model, type);
+  }
+
   onModelChange(types){
     if(types !== this.state.types && types.length > 0){
-      this.setState({
-        types,
-        fqn:types[0].getFullyQualifiedName(),
-        json: null
-      });
+      const state = { types };
+      if(!types.map(t => t.getFullyQualifiedName()).includes(this.state.fqn)){
+        state.fqn = types[0].getFullyQualifiedName();
+      }
+      if(this.state.json && !this.isInstanceOf(state.fqn, this.state.json)) {
+        state.json = this.generateEmptyJson(state.fqn);
+      }
+      if(!this.state.json) {
+        state.json = this.generateEmptyJson(state.fqn);
+      }
+      this.setState(state);
     }
   }
 
@@ -143,12 +164,10 @@ class App extends Component {
         <div className="ui segment">
           <h2>JSON</h2>
           <div className='ui form field'>
-          {this.state.json &&
           <textarea
             value={JSON.stringify(this.state.json, null, 2)}
             onChange={this.handleJsonTextAreaChange.bind(this)}
           />
-          }
           </div>
         </div>
       </div>

@@ -35,7 +35,6 @@ class ConcertoForm extends Component {
       value: null,
 
       form: null,
-      types: [],
 
     };
 
@@ -76,63 +75,32 @@ class ConcertoForm extends Component {
       } else if (type === 'url') {
         types = await this.generator.loadFromUrl(file);
       }
-      // this.props.onModelChange(types);
-      return types;
+      this.props.onModelChange(types);
     } catch (error) {
       console.error(error);
     }
   }
 
   static getDerivedStateFromProps(props, state){
-    // const state = value = ;
-    // state.warning = null;
-
-    // const valid = this.generator.isInstanceOf(this.state.value, this.props.model);
-
-    // // console.warn(prevProps.model, this.props.model, this.state.value, !valid);
-    // if (!valid){
-    //   state.value = null;
-    //   this.props.onValueChange(null);
-    // }
-    return { value: props.json ? Object.assign({},props.json): null, warning: null};
+    return { value: props.json || {}, warning: null};
   }
 
   async componentDidMount(){
     if (this.props.modelFile) {
-      const types = await this.loadModelFile(this.props.modelFile, 'text');
-      if(types){
-        this.setState({ types }, () => { this.props.onModelChange(types);});
-      }
+      await this.loadModelFile(this.props.modelFile, 'text');
     }
 
     if (this.props.modelUrl) {
-      const types = await this.loadModelFile(this.props.modelFile, 'url');
-      if(types){
-        this.setState({ types }, () => { this.props.onModelChange(types);});
-      }
-    }
-
-    if(this.props.model && !this.state.value && this.options.includeSampleData){
-      this.setState({ value: this.generator.generateJSON(this.props.model)});
+      await this.loadModelFile(this.props.modelUrl, 'url');
     }
   }
 
   async componentDidUpdate(prevProps) {
     if (prevProps.modelFile !== this.props.modelFile) {
-      const types = await this.loadModelFile(this.props.modelFile, 'text');
-      if(types){
-        this.setState({ types }, () => { this.props.onModelChange(types);});
-      }
+      await this.loadModelFile(this.props.modelFile, 'text');
     }
     if (prevProps.modelUrl !== this.props.modelUrl) {
-      const types = await this.loadModelFile(this.props.modelUrl, 'url');
-      if(types){
-        this.setState({ types }, () => { this.props.onModelChange(types);});
-      }
-    }
-
-    if(this.props.model && !this.state.value && this.options.includeSampleData){
-      this.setState({ value: this.generator.generateJSON(this.props.model)});
+      await this.loadModelFile(this.props.modelUrl, 'url');
     }
   }
 
@@ -148,6 +116,14 @@ class ConcertoForm extends Component {
     this.props.onValueChange(this.state.value);
   }
 
+  isInstanceOf(model, type){
+    return this.generator.isInstanceOf(model, type);
+  }
+
+  generateJSON(type){
+    return this.generator.generateJSON(type);
+  }
+
   onFieldValueChange(e, key) {
     const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
     jsonpath.value(this.state.value, key, value);
@@ -156,13 +132,7 @@ class ConcertoForm extends Component {
 
   renderForm(){
     if (this.props.model && this.state.value) {
-      const form = this.generator.generateHTML(this.props.model, this.state.value);
-
-      // // The generation step created some new JSON, so tell everyone about it
-      // if(this.state.value !== json) {
-      //   this.props.onValueChange(json);
-      // }
-      return form;
+      return this.generator.generateHTML(this.props.model, this.state.value);
     }
     return null;
   }

@@ -27,10 +27,9 @@ class ConcertoFormWrapper extends Component {
   }
 
   render() {
-    /** Using a key property, based on advice here https://reactjs.org/blog/2018/06/07/you-probably-dont-need-derived-state.html#recommendation-fully-uncontrolled-component-with-a-key  */
     return (
       <ErrorBoundary>
-        <ConcertoForm key={this.props.model} {...this.props} />
+        <ConcertoForm {...this.props} />
       </ErrorBoundary>
     );
   }
