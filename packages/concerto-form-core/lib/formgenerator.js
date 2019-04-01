@@ -69,7 +69,8 @@ class FormGenerator {
         this.modelManager.clearModelFiles();
         const model = await fs.readFileSync(path, 'utf8');
         this.modelManager.addModelFile(model, undefined, true);
-        return this.modelManager.updateExternalModels();
+        await this.modelManager.updateExternalModels();
+        return this.getTypes();
     }
 
     /**
@@ -79,7 +80,8 @@ class FormGenerator {
     async loadFromText(text) {
         this.modelManager.clearModelFiles();
         this.modelManager.addModelFile(text, undefined, true);
-        return this.modelManager.updateExternalModels();
+        await this.modelManager.updateExternalModels();
+        return this.getTypes();
     }
 
     /**
@@ -138,12 +140,65 @@ class FormGenerator {
     }
 
     /**
+     * Returns true if the provided JSON object is an instance a specified type
+     * @param {object} model - a JSON instance of a model
+     * @param {string} type - a fully qualified type name
+     * @returns {boolean} - true if the provided JSON object is an instance a specified type
+     */
+    isInstanceOf(model, type){
+        if(!model || !type){
+            return false;
+        }
+        return this.modelManager.getSerializer().fromJSON(model).instanceOf(type);
+    }
+
+
+    /**
+    * @param {Object} type - The type from the model source to generate a JSON for
+    * @return {object} the generated JSON instance
+    */
+    generateJSON (type) {
+        const classDeclaration = this.modelManager.getType(type);
+        if(!classDeclaration){
+            throw new Error(type + ' not found');
+        }
+
+        if(classDeclaration.isEnum()){
+            throw new Error('Cannot generate JSON for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
+        }
+
+        if(classDeclaration.isAbstract()){
+            throw new Error('Cannot generate JSON for abstract types');
+        }
+
+        if(!this.options.includeSampleData){
+            throw new Error('Cannot generate form values when the component is configured not to generate sample data.');
+        }
+
+        const ns = classDeclaration.getNamespace();
+        const name = classDeclaration.getName();
+        const factoryOptions =  {
+            includeOptionalFields: this.options.includeOptionalFields,
+            generate: this.options.includeSampleData,
+        };
+
+        if(classDeclaration.isConcept()){
+            const concept = this.factory.newConcept(ns, name, factoryOptions);
+            return this.serializer.toJSON(concept);
+        } else {
+            const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
+            return this.serializer.toJSON(resource);
+        }
+    }
+
+    /**
     * @param {Object} type - The type from the model source to generate a form for
-    * @param {Object} json - An optional JSON instance that provides values for the form fields
+    * @param {Object} json - A JSON instance that provides values for the form fields
     * @return {object} the generated HTML string
     */
     generateHTML (type, json) {
-        console.warn(type);
+        console.log(this.getTypes());
+
         const classDeclaration = this.modelManager.getType(type);
         if(!classDeclaration){
             throw new Error(type + ' not found');
@@ -157,47 +212,15 @@ class FormGenerator {
             throw new Error('Cannot generate forms for abstract types');
         }
 
-        if(!json && !this.options.includeSampleData){
-            throw new Error('Cannot generate form values when the provided JSON is null and the component configured not to generate sample data.');
-        }
-
-        const ns = classDeclaration.getNamespace();
-        const name = classDeclaration.getName();
-        const factoryOptions =  {
-            includeOptionalFields: this.options.includeOptionalFields,
-            generate: this.options.includeSampleData,
-        };
-
-        let newJSON = json;
-        if(!newJSON){
-            if(classDeclaration.isConcept()){
-                const concept = this.factory.newConcept(ns, name, factoryOptions);
-                newJSON = this.serializer.toJSON(concept);
-            } else {
-                const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
-                newJSON = this.serializer.toJSON(resource);
-            }
-        }
-
         const params = Object.assign({
             customClasses: {},
             timestamp: Date.now(),
             modelManager: this.modelManager,
-            json: newJSON,
+            json,
             stack: [],
         }, this.options);
 
-        let visitor = params.visitor;
-        if(!visitor){
-            visitor = new HTMLFormVisitor();
-            params.wrapHtmlForm = true;
-        }
-
-        const html = classDeclaration.accept(visitor, params);
-        if(params.wrapHtmlForm){
-            return { html: visitor.wrapHtmlForm(html, params), json: newJSON};
-        }
-        return { form: html, json: newJSON };
+        return classDeclaration.accept(params.visitor, params);
     }
 
 }
