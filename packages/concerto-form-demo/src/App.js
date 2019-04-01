@@ -54,11 +54,11 @@ class App extends Component {
 
   handleDeclarationSelectionChange(event) {
     const state = {fqn: event.target.value};
-    if(this.state.json && !this.isInstanceOf(state.fqn, this.state.json)) {
-      state.json = this.generateEmptyJson(state.fqn);
+    if(this.state.json && !this.getForm().isInstanceOf(state.fqn, this.state.json)) {
+      state.json = this.getForm().generateJSON(state.fqn);
     }
     if(!this.state.json) {
-      state.json = this.generateEmptyJson(state.fqn);
+      state.json = this.getForm().generateJSON(state.fqn);
     }
     this.setState(state);
   }
@@ -67,34 +67,43 @@ class App extends Component {
     this.setState({json: JSON.parse(event.target.value)});
   }
 
-  handleModelTextAreaChange(event) {
-    this.setState({modelFile: event.target.value});
+  async handleModelTextAreaChange(event) {
+    const value = event.target.value;
+    const types = await this.getForm().loadModelFile(value, 'text');
+    this.setState({modelFile: value});
+    this.onModelChange(types);
   }
 
-  handleUrlChange(event) {
-    this.setState({modelUrl: event.target.value});
+  async handleUrlChange(event) {
+    const value = event.target.value;
+    const types = await this.getForm().loadModelFile(value, 'url');
+    this.setState({modelFile: value});
+    this.onModelChange(types);
   }
 
-  generateEmptyJson(type) {
-    return this.form.current.generateJSON(type);
+  getForm(){
+    return this.form.current;
   }
 
-  isInstanceOf(model, type) {
-    return this.form.current.isInstanceOf(model, type);
-  }
-
-  onModelChange(types){
+  async onModelChange(types){
     if(types !== this.state.types && types.length > 0){
       const state = { types };
       if(!types.map(t => t.getFullyQualifiedName()).includes(this.state.fqn)){
         state.fqn = types[0].getFullyQualifiedName();
+        if(this.state.json && !this.getForm().isInstanceOf(state.fqn, this.state.json)) {
+          state.json = this.getForm().generateJSON(state.fqn);
+        }
+        if(!this.state.json) {
+          state.json = this.getForm().generateJSON(state.fqn);
+        }
       }
-      if(this.state.json && !this.isInstanceOf(state.fqn, this.state.json)) {
-        state.json = this.generateEmptyJson(state.fqn);
+      if(this.state.fqn && this.state.json && !this.getForm().isInstanceOf(this.state.fqn, this.state.json)) {
+        state.json = this.getForm().generateJSON(this.state.fqn);
       }
-      if(!this.state.json) {
-        state.json = this.generateEmptyJson(state.fqn);
+      if(this.state.fqn && !this.state.json) {
+        state.json = this.getForm().generateJSON(this.state.fqn);
       }
+
       this.setState(state);
     }
   }

@@ -33,9 +33,6 @@ class ConcertoForm extends Component {
       // This is needed so that we can use the jsonpath library to change object properties by key
       // using the jsonpath module, without modifying the props object
       value: null,
-
-      form: null,
-
     };
 
     // Default values which can be overridden by parent components
@@ -75,7 +72,7 @@ class ConcertoForm extends Component {
       } else if (type === 'url') {
         types = await this.generator.loadFromUrl(file);
       }
-      this.props.onModelChange(types);
+      return types;
     } catch (error) {
       console.error(error);
     }
@@ -85,24 +82,24 @@ class ConcertoForm extends Component {
     return { value: props.json || {}, warning: null};
   }
 
-  async componentDidMount(){
-    if (this.props.modelFile) {
-      await this.loadModelFile(this.props.modelFile, 'text');
-    }
+  // async componentDidMount(){
+  //   if (this.props.modelFile) {
+  //     await this.loadModelFile(this.props.modelFile, 'text');
+  //   }
 
-    if (this.props.modelUrl) {
-      await this.loadModelFile(this.props.modelUrl, 'url');
-    }
-  }
+  //   if (this.props.modelUrl) {
+  //     await this.loadModelFile(this.props.modelUrl, 'url');
+  //   }
+  // }
 
-  async componentDidUpdate(prevProps) {
-    if (prevProps.modelFile !== this.props.modelFile) {
-      await this.loadModelFile(this.props.modelFile, 'text');
-    }
-    if (prevProps.modelUrl !== this.props.modelUrl) {
-      await this.loadModelFile(this.props.modelUrl, 'url');
-    }
-  }
+  // async componentDidUpdate(prevProps) {
+  //   if (prevProps.modelFile !== this.props.modelFile) {
+  //     await this.loadModelFile(this.props.modelFile, 'text');
+  //   }
+  //   if (prevProps.modelUrl !== this.props.modelUrl) {
+  //     await this.loadModelFile(this.props.modelUrl, 'url');
+  //   }
+  // }
 
   removeElement(e, key, index){
     const array = jsonpath.value(this.state.value, key);
