@@ -66,7 +66,7 @@ class App extends Component {
   }
 
   getForm(){
-    return this.form.current;
+    return this.form.current.getForm();
   }
 
   onModelChange(modelProps){

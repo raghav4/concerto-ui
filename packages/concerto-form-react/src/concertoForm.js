@@ -14,6 +14,7 @@
 
 import React, { Component } from 'react';
 import ReactFormVisitor from './reactformvisitor';
+import './concertoForm.css';
 import PropTypes from 'prop-types';
 import jsonpath from 'jsonpath';
 import {FormGenerator} from 'concerto-form-core';
@@ -64,7 +65,7 @@ class ConcertoForm extends Component {
     this.generator = new FormGenerator(this.options);
   }
 
-  async componentDidMount() {
+  componentDidMount() {
     this._loadAsyncData().then((modelProps) => {
       this.props.onModelChange(modelProps);
     });
@@ -169,4 +170,4 @@ ConcertoForm.propTypes = {
   readOnly: PropTypes.bool,
 };
 
-module.exports = ConcertoForm;
+export default ConcertoForm;
