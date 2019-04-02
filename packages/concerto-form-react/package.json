@@ -32,7 +32,7 @@
     "test": "jest",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "postinstall": "npm run build",
-    "build": "babel ./src -d ./lib"
+    "build": "babel ./src -d ./lib --copy-files"
   },
   "keywords": [
     "blockchain",
