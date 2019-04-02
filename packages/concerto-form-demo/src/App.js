@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import React, { Component } from 'react';
+import React, { Component, Message } from 'react';
 import './App.css';
 import { ConcertoForm } from 'concerto-form-react';
 import { Tab } from 'semantic-ui-react';
@@ -31,11 +31,8 @@ class App extends Component {
       // The list of types in the model manager that can have a form generated
       types: [],
 
-      // A source model file URL, e.g. https://models.accordproject.org/patents/patent.cto
-      modelUrl: '',
-
       // Source model file text
-      modelFile: '',
+      model: '',
 
       // Rendering options
       options: {
@@ -46,20 +43,17 @@ class App extends Component {
         // 'empty' provides sensible empty values
         includeSampleData: 'sample', // or 'empty'
       },
+
+      error: null,
     };
 
-    this.onModelChange = this.onModelChange.bind(this);
     this.onValueChange = this.onValueChange.bind(this);
+    this.onModelChange = this.onModelChange.bind(this);
   }
 
   handleDeclarationSelectionChange(event) {
     const state = {fqn: event.target.value};
-    if(this.state.json && !this.getForm().isInstanceOf(state.fqn, this.state.json)) {
-      state.json = this.getForm().generateJSON(state.fqn);
-    }
-    if(!this.state.json) {
-      state.json = this.getForm().generateJSON(state.fqn);
-    }
+    state.json = this.getForm().generateJSON(state.fqn);
     this.setState(state);
   }
 
@@ -67,45 +61,16 @@ class App extends Component {
     this.setState({json: JSON.parse(event.target.value)});
   }
 
-  async handleModelTextAreaChange(event) {
-    const value = event.target.value;
-    const types = await this.getForm().loadModelFile(value, 'text');
-    this.setState({modelFile: value});
-    this.onModelChange(types);
-  }
-
-  async handleUrlChange(event) {
-    const value = event.target.value;
-    const types = await this.getForm().loadModelFile(value, 'url');
-    this.setState({modelFile: value});
-    this.onModelChange(types);
+  handleModelTextAreaChange(event) {
+    this.setState({model: event.target.value});
   }
 
   getForm(){
     return this.form.current;
   }
 
-  async onModelChange(types){
-    if(types !== this.state.types && types.length > 0){
-      const state = { types };
-      if(!types.map(t => t.getFullyQualifiedName()).includes(this.state.fqn)){
-        state.fqn = types[0].getFullyQualifiedName();
-        if(this.state.json && !this.getForm().isInstanceOf(state.fqn, this.state.json)) {
-          state.json = this.getForm().generateJSON(state.fqn);
-        }
-        if(!this.state.json) {
-          state.json = this.getForm().generateJSON(state.fqn);
-        }
-      }
-      if(this.state.fqn && this.state.json && !this.getForm().isInstanceOf(this.state.fqn, this.state.json)) {
-        state.json = this.getForm().generateJSON(this.state.fqn);
-      }
-      if(this.state.fqn && !this.state.json) {
-        state.json = this.getForm().generateJSON(this.state.fqn);
-      }
-
-      this.setState(state);
-    }
+  onModelChange(modelProps){
+    this.setState(modelProps);
   }
 
   onValueChange(json){
@@ -118,25 +83,28 @@ class App extends Component {
         <form>
           <div className="ui form">
             <textarea
-              value={this.state.modelFile}
+              value={this.state.model}
               onChange={this.handleModelTextAreaChange.bind(this)}
               className={'form-control Text-area'}
               placeholder="Paste a model file"/>
           </div>
         </form>
       </Tab.Pane>) },
-      {menuItem: 'Import from URL', render: () => (<Tab.Pane>
-        <form>
-          <div className="ui form">
-            <input type="text"
-              value={this.state.modelUrl}
-              onChange={this.handleUrlChange.bind(this)}
-              className={'form-control'}
-              placeholder="https://"/>
-          </div>
-        </form>
-      </Tab.Pane>) },
     ];
+
+    const form = this.state.error
+      ? (<Message>
+        <p>An error occured</p>
+      </Message>)
+      : <ConcertoForm
+        ref={this.form}
+        onModelChange={this.onModelChange}
+        onValueChange={this.onValueChange}
+        type={this.state.fqn}
+        model={this.state.model}
+        json={this.state.json}
+        options={this.state.options}
+      />;
 
     return (
       <div className="App container ui form">
@@ -159,15 +127,7 @@ class App extends Component {
         <div className="ui segment">
           <h2>Form</h2>
           <div >
-            <ConcertoForm ref={this.form}
-              onModelChange={this.onModelChange}
-              onValueChange={this.onValueChange}
-              model={this.state.fqn}
-              modelFile={this.state.modelFile}
-              modelUrl={this.state.modelUrl}
-              json={this.state.json}
-              options={this.state.options}
-            />
+            {form}
           </div>
         </div>
         <div className="ui segment">
