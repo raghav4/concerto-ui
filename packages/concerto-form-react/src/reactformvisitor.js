@@ -274,16 +274,28 @@ class ReactFormVisitor extends HTMLFormVisitor {
     const key = jsonpath.stringify(parameters.stack);
     let value = jsonpath.value(parameters.json,key);
 
-    const component = (<div className={fieldStyle} key={relationship.getName()}>
-            <label>{Utilities.normalizeLabel(relationship.getName())}</label>
-            <input
-                type='text'
-                className={styles.input}
-                value={value}
-                onChange={(e)=>parameters.onFieldValueChange(e, key)}
-                key={key}
-                />
-        </div>);
+    let component;
+    if(typeof value === 'object'){
+      let type = parameters.modelManager.getType(value.$class);
+      type = this.findConcreteSubclass(type);
+      component = (<div className={fieldStyle} key={relationship.getName()}>
+                <label>{Utilities.normalizeLabel(relationship.getName())}</label>
+                {type.accept(this, parameters)}
+            </div>);
+    } else {
+      component = (<div className={fieldStyle} key={relationship.getName()}>
+      <label>{Utilities.normalizeLabel(relationship.getName())}</label>
+      <input
+          type='text'
+          className={styles.input}
+          value={value}
+          onChange={(e)=>parameters.onFieldValueChange(e, key)}
+          key={key}
+          />
+      </div>);
+    }
+
+
 
     parameters.stack.pop();
     return component;

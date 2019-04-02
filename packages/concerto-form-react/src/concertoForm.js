@@ -38,7 +38,7 @@ class ConcertoForm extends Component {
     // Default values which can be overridden by parent components
     this.options = Object.assign({
       includeOptionalFields: true,
-      includeSampleData: null,
+      includeSampleData: 'sample',
       disabled: props.readOnly,
       visitor: new ReactFormVisitor(),
       // CSS Styling, specify classnames
