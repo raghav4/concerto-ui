@@ -116,7 +116,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
       style += ' ' + styles.required;
     }
     if(parameters.disabled){
-      style += ' disabled';
+      style += ' readonly transparent';
     }
     if (field.isArray()) {
       let arrayField = (field, parameters) => {
@@ -268,7 +268,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
       fieldStyle += ' ' + styles.required;
     }
     if(parameters.disabled){
-      fieldStyle += ' disabled';
+      fieldStyle += ' readonly transparent';
     }
 
     const key = jsonpath.stringify(parameters.stack);
@@ -358,4 +358,4 @@ Date.prototype.toDatetimeLocal =
              HH + ':' + II + ':' + SS;
   };
 
-module.exports = ReactFormVisitor;
+export default ReactFormVisitor;

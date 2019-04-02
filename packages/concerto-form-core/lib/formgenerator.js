@@ -53,7 +53,7 @@ class FormGenerator {
           o String eventId
         }`, 'org.accordproject.base.cto', false, true);
 
-        this.options = options;
+        this.options = Object.assign({includeSampleData: 'empty' }, options);
 
         // this.modelManager = options.modelManager ? new options.modelManager() : new ModelManager();
         this.factory = new Factory(this.modelManager);
@@ -78,13 +78,16 @@ class FormGenerator {
      * @returns {array} A list of types stored in the model manager
      */
     getTypes(){
-        return this.modelManager.getModelFiles()
+        if(this.loaded){
+            return this.modelManager.getModelFiles()
             .reduce((classDeclarations, modelFile) => {
                 return classDeclarations.concat(modelFile.getAllDeclarations());
             }, [])
             .filter(classDeclaration => {
                 return !classDeclaration.isEnum() && !classDeclaration.isAbstract();
             });
+        }
+        return [];
     }
 
     /**
@@ -123,36 +126,38 @@ class FormGenerator {
     * @return {object} the generated JSON instance
     */
     generateJSON (type) {
-        const classDeclaration = this.modelManager.getType(type);
-        if(!classDeclaration){
-            throw new Error(type + ' not found');
-        }
+        if(this.loaded){
+            const classDeclaration = this.modelManager.getType(type);
+            if(!classDeclaration){
+                throw new Error(type + ' not found');
+            }
 
-        if(classDeclaration.isEnum()){
-            throw new Error('Cannot generate JSON for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
-        }
+            if(classDeclaration.isEnum()){
+                throw new Error('Cannot generate JSON for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
+            }
 
-        if(classDeclaration.isAbstract()){
-            throw new Error('Cannot generate JSON for abstract types');
-        }
+            if(classDeclaration.isAbstract()){
+                throw new Error('Cannot generate JSON for abstract types');
+            }
 
-        if(!this.options.includeSampleData){
-            throw new Error('Cannot generate form values when the component is configured not to generate sample data.');
-        }
+            if(!this.options.includeSampleData){
+                throw new Error('Cannot generate form values when the component is configured not to generate sample data.');
+            }
 
-        const ns = classDeclaration.getNamespace();
-        const name = classDeclaration.getName();
-        const factoryOptions =  {
-            includeOptionalFields: this.options.includeOptionalFields,
-            generate: this.options.includeSampleData,
-        };
+            const ns = classDeclaration.getNamespace();
+            const name = classDeclaration.getName();
+            const factoryOptions =  {
+                includeOptionalFields: this.options.includeOptionalFields,
+                generate: this.options.includeSampleData,
+            };
 
-        if(classDeclaration.isConcept()){
-            const concept = this.factory.newConcept(ns, name, factoryOptions);
-            return this.serializer.toJSON(concept);
-        } else {
-            const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
-            return this.serializer.toJSON(resource);
+            if(classDeclaration.isConcept()){
+                const concept = this.factory.newConcept(ns, name, factoryOptions);
+                return this.serializer.toJSON(concept);
+            } else {
+                const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
+                return this.serializer.toJSON(resource);
+            }
         }
     }
 
