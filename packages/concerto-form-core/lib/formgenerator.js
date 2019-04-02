@@ -19,7 +19,6 @@ const ModelManager = require('composer-concerto').ModelManager;
 const Factory = require('composer-concerto').Factory;
 const Serializer = require('composer-concerto').Serializer;
 
-const HTMLFormVisitor = require('./htmlformvisitor');
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
 * and assets.
@@ -54,22 +53,12 @@ class FormGenerator {
           o String eventId
         }`, 'org.accordproject.base.cto', false, true);
 
-        this.options = options;
+        this.options = Object.assign({includeSampleData: 'empty' }, options);
 
         // this.modelManager = options.modelManager ? new options.modelManager() : new ModelManager();
         this.factory = new Factory(this.modelManager);
         this.serializer = new Serializer(this.factory, this.modelManager);
-    }
-
-    /**
-    * Load a model from a file.
-    * @param {String} path  - the path to a file
-    */
-    async loadFromFile(path) {
-        this.modelManager.clearModelFiles();
-        const model = await fs.readFileSync(path, 'utf8');
-        this.modelManager.addModelFile(model, undefined, true);
-        return this.modelManager.updateExternalModels();
+        this.loaded = false;
     }
 
     /**
@@ -77,50 +66,28 @@ class FormGenerator {
     * @param {String} text  - the model
     */
     async loadFromText(text) {
+        this.loaded = false;
         this.modelManager.clearModelFiles();
         this.modelManager.addModelFile(text, undefined, true);
-        return this.modelManager.updateExternalModels();
-    }
-
-    /**
-    * Load a model from an URL.
-    * @param {String} url  - the URL to a zip or cto archive
-    */
-    async loadFromUrl(url) {
-        const request = {};
-        request.url = url;
-        request.method = 'get';
-        request.responseType = 'text';
-        request.timeout = 5000;
-
-        try {
-            const response = await axios(request);
-            let text = await response.data.toString('utf8');
-            this.modelManager.clearModelFiles();
-            this.modelManager.addModelFile(text, undefined, true);
-            return this.modelManager.updateExternalModels();
-        } catch (error) {
-            if (error.response) {
-                throw new Error('Request to URL ['+ url +'] returned with error code: ' + error.response.status);
-            } else if (error.request) {
-                throw new Error('Server did not respond for URL ['+ url +']');
-            } else {
-                throw new Error('Error when accessing URL ['+ url +'] ' + error.message);
-            }
-        }
+        await this.modelManager.updateExternalModels();
+        this.loaded = true;
+        return this.getTypes();
     }
 
     /**
      * @returns {array} A list of types stored in the model manager
      */
     getTypes(){
-        return this.modelManager.getModelFiles()
+        if(this.loaded){
+            return this.modelManager.getModelFiles()
             .reduce((classDeclarations, modelFile) => {
                 return classDeclarations.concat(modelFile.getAllDeclarations());
             }, [])
             .filter(classDeclaration => {
                 return !classDeclaration.isEnum() && !classDeclaration.isAbstract();
             });
+        }
+        return [];
     }
 
     /**
@@ -138,66 +105,93 @@ class FormGenerator {
     }
 
     /**
+     * Returns true if the provided JSON object is an instance a specified type
+     * @param {object} model - a JSON instance of a model
+     * @param {string} type - a fully qualified type name
+     * @returns {boolean} - true if the provided JSON object is an instance a specified type
+     */
+    isInstanceOf(model, type){
+        if(!model || !type){
+            return false;
+        }
+        try {
+            return this.modelManager.getSerializer().fromJSON(model).instanceOf(type);
+        } catch (error){
+            return false;
+        }
+    }
+
+    /**
+    * @param {Object} type - The type from the model source to generate a JSON for
+    * @return {object} the generated JSON instance
+    */
+    generateJSON (type) {
+        if(this.loaded){
+            const classDeclaration = this.modelManager.getType(type);
+            if(!classDeclaration){
+                throw new Error(type + ' not found');
+            }
+
+            if(classDeclaration.isEnum()){
+                throw new Error('Cannot generate JSON for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
+            }
+
+            if(classDeclaration.isAbstract()){
+                throw new Error('Cannot generate JSON for abstract types');
+            }
+
+            if(!this.options.includeSampleData){
+                throw new Error('Cannot generate form values when the component is configured not to generate sample data.');
+            }
+
+            const ns = classDeclaration.getNamespace();
+            const name = classDeclaration.getName();
+            const factoryOptions =  {
+                includeOptionalFields: this.options.includeOptionalFields,
+                generate: this.options.includeSampleData,
+            };
+
+            if(classDeclaration.isConcept()){
+                const concept = this.factory.newConcept(ns, name, factoryOptions);
+                return this.serializer.toJSON(concept);
+            } else {
+                const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
+                return this.serializer.toJSON(resource);
+            }
+        }
+    }
+
+    /**
     * @param {Object} type - The type from the model source to generate a form for
-    * @param {Object} json - An optional JSON instance that provides values for the form fields
+    * @param {Object} json - A JSON instance that provides values for the form fields
     * @return {object} the generated HTML string
     */
     generateHTML (type, json) {
-        console.warn(type);
-        const classDeclaration = this.modelManager.getType(type);
-        if(!classDeclaration){
-            throw new Error(type + ' not found');
-        }
-
-        if(classDeclaration.isEnum()){
-            throw new Error('Cannot generate forms for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
-        }
-
-        if(classDeclaration.isAbstract()){
-            throw new Error('Cannot generate forms for abstract types');
-        }
-
-        if(!json && !this.options.includeSampleData){
-            throw new Error('Cannot generate form values when the provided JSON is null and the component configured not to generate sample data.');
-        }
-
-        const ns = classDeclaration.getNamespace();
-        const name = classDeclaration.getName();
-        const factoryOptions =  {
-            includeOptionalFields: this.options.includeOptionalFields,
-            generate: this.options.includeSampleData,
-        };
-
-        let newJSON = json;
-        if(!newJSON){
-            if(classDeclaration.isConcept()){
-                const concept = this.factory.newConcept(ns, name, factoryOptions);
-                newJSON = this.serializer.toJSON(concept);
-            } else {
-                const resource = this.factory.newResource(ns, name, 'resource1', factoryOptions);
-                newJSON = this.serializer.toJSON(resource);
+        if(this.loaded){
+            const classDeclaration = this.modelManager.getType(type);
+            if(!classDeclaration){
+                throw new Error(type + ' not found');
             }
-        }
 
-        const params = Object.assign({
-            customClasses: {},
-            timestamp: Date.now(),
-            modelManager: this.modelManager,
-            json: newJSON,
-            stack: [],
-        }, this.options);
+            if(classDeclaration.isEnum()){
+                throw new Error('Cannot generate forms for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
+            }
 
-        let visitor = params.visitor;
-        if(!visitor){
-            visitor = new HTMLFormVisitor();
-            params.wrapHtmlForm = true;
-        }
+            if(classDeclaration.isAbstract()){
+                throw new Error('Cannot generate forms for abstract types');
+            }
 
-        const html = classDeclaration.accept(visitor, params);
-        if(params.wrapHtmlForm){
-            return { html: visitor.wrapHtmlForm(html, params), json: newJSON};
+            const params = Object.assign({
+                customClasses: {},
+                timestamp: Date.now(),
+                modelManager: this.modelManager,
+                json,
+                stack: [],
+            }, this.options);
+
+            return classDeclaration.accept(params.visitor, params);
         }
-        return { form: html, json: newJSON };
+        return null;
     }
 
 }

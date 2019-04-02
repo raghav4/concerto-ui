@@ -21,5 +21,12 @@
  * @module concerto-form-react
  */
 
-module.exports.ReactFormVisitor = require('./lib/reactformvisitor.js');
-module.exports.ConcertoForm = require('./lib/concertoForm.js');
+import ReactFormVisitor from './lib/reactformvisitor';
+import ConcertoFormWrapper from './lib/concertoFormWrapper';
+
+export {
+    ReactFormVisitor,
+    ConcertoFormWrapper as ConcertoForm,
+};
+
+

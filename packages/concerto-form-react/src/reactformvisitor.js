@@ -116,7 +116,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
       style += ' ' + styles.required;
     }
     if(parameters.disabled){
-      style += ' disabled';
+      style += ' readonly transparent';
     }
     if (field.isArray()) {
       let arrayField = (field, parameters) => {
@@ -268,18 +268,18 @@ class ReactFormVisitor extends HTMLFormVisitor {
       fieldStyle += ' ' + styles.required;
     }
     if(parameters.disabled){
-      fieldStyle += ' disabled';
+      fieldStyle += ' readonly transparent';
     }
 
     const key = jsonpath.stringify(parameters.stack);
-    const value = jsonpath.value(parameters.json,key);
+    let value = jsonpath.value(parameters.json,key);
 
     const component = (<div className={fieldStyle} key={relationship.getName()}>
             <label>{Utilities.normalizeLabel(relationship.getName())}</label>
             <input
                 type='text'
                 className={styles.input}
-                value={JSON.stringify(value)}
+                value={value}
                 onChange={(e)=>parameters.onFieldValueChange(e, key)}
                 key={key}
                 />
@@ -358,4 +358,4 @@ Date.prototype.toDatetimeLocal =
              HH + ':' + II + ':' + SS;
   };
 
-module.exports = ReactFormVisitor;
+export default ReactFormVisitor;
