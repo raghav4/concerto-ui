@@ -19,7 +19,6 @@ const ModelManager = require('composer-concerto').ModelManager;
 const Factory = require('composer-concerto').Factory;
 const Serializer = require('composer-concerto').Serializer;
 
-const HTMLFormVisitor = require('./htmlformvisitor');
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
 * and assets.
@@ -59,18 +58,7 @@ class FormGenerator {
         // this.modelManager = options.modelManager ? new options.modelManager() : new ModelManager();
         this.factory = new Factory(this.modelManager);
         this.serializer = new Serializer(this.factory, this.modelManager);
-    }
-
-    /**
-    * Load a model from a file.
-    * @param {String} path  - the path to a file
-    */
-    async loadFromFile(path) {
-        this.modelManager.clearModelFiles();
-        const model = await fs.readFileSync(path, 'utf8');
-        this.modelManager.addModelFile(model, undefined, true);
-        await this.modelManager.updateExternalModels();
-        return this.getTypes();
+        this.loaded = false;
     }
 
     /**
@@ -78,38 +66,12 @@ class FormGenerator {
     * @param {String} text  - the model
     */
     async loadFromText(text) {
+        this.loaded = false;
         this.modelManager.clearModelFiles();
         this.modelManager.addModelFile(text, undefined, true);
         await this.modelManager.updateExternalModels();
+        this.loaded = true;
         return this.getTypes();
-    }
-
-    /**
-    * Load a model from an URL.
-    * @param {String} url  - the URL to a zip or cto archive
-    */
-    async loadFromUrl(url) {
-        const request = {};
-        request.url = url;
-        request.method = 'get';
-        request.responseType = 'text';
-        request.timeout = 5000;
-
-        try {
-            const response = await axios(request);
-            let text = await response.data.toString('utf8');
-            this.modelManager.clearModelFiles();
-            this.modelManager.addModelFile(text, undefined, true);
-            return this.modelManager.updateExternalModels();
-        } catch (error) {
-            if (error.response) {
-                throw new Error('Request to URL ['+ url +'] returned with error code: ' + error.response.status);
-            } else if (error.request) {
-                throw new Error('Server did not respond for URL ['+ url +']');
-            } else {
-                throw new Error('Error when accessing URL ['+ url +'] ' + error.message);
-            }
-        }
     }
 
     /**
@@ -200,28 +162,31 @@ class FormGenerator {
     * @return {object} the generated HTML string
     */
     generateHTML (type, json) {
-        const classDeclaration = this.modelManager.getType(type);
-        if(!classDeclaration){
-            throw new Error(type + ' not found');
+        if(this.loaded){
+            const classDeclaration = this.modelManager.getType(type);
+            if(!classDeclaration){
+                throw new Error(type + ' not found');
+            }
+
+            if(classDeclaration.isEnum()){
+                throw new Error('Cannot generate forms for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
+            }
+
+            if(classDeclaration.isAbstract()){
+                throw new Error('Cannot generate forms for abstract types');
+            }
+
+            const params = Object.assign({
+                customClasses: {},
+                timestamp: Date.now(),
+                modelManager: this.modelManager,
+                json,
+                stack: [],
+            }, this.options);
+
+            return classDeclaration.accept(params.visitor, params);
         }
-
-        if(classDeclaration.isEnum()){
-            throw new Error('Cannot generate forms for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
-        }
-
-        if(classDeclaration.isAbstract()){
-            throw new Error('Cannot generate forms for abstract types');
-        }
-
-        const params = Object.assign({
-            customClasses: {},
-            timestamp: Date.now(),
-            modelManager: this.modelManager,
-            json,
-            stack: [],
-        }, this.options);
-
-        return classDeclaration.accept(params.visitor, params);
+        return null;
     }
 
 }

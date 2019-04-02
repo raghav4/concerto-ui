@@ -12,12 +12,11 @@
  * limitations under the License.
  */
 
-const React = require('react');
-const Component = require('react').Component;
-const jsonpath = require('jsonpath');
-const ReactFormVisitor = require('./reactformvisitor');
-const PropTypes = require('prop-types');
-const {FormGenerator} = require('concerto-form-core');
+import React, { Component } from 'react';
+import ReactFormVisitor from './reactformvisitor';
+import PropTypes from 'prop-types';
+import jsonpath from 'jsonpath';
+import {FormGenerator} from 'concerto-form-core';
 
 /**
  * This React component generates a React object for a bound model.
@@ -61,45 +60,54 @@ class ConcertoForm extends Component {
         this.removeElement(e, key, index);
       },
     }, props.options);
+
     this.generator = new FormGenerator(this.options);
   }
 
-  async loadModelFile(file, type) {
-    try {
-      let types;
-      if  (type === 'text') {
-        types = await this.generator.loadFromText(file);
-      } else if (type === 'url') {
-        types = await this.generator.loadFromUrl(file);
-      }
-      return types;
-    } catch (error) {
-      console.error(error);
+  async componentDidMount() {
+    this._loadAsyncData().then((modelProps) => {
+      this.props.onModelChange(modelProps);
+    });
+  }
+
+  componentDidUpdate(prevProps) {
+    if (this.props.model !== prevProps.model) {
+      this._loadAsyncData().then((modelProps) => {
+        this.props.onModelChange(modelProps);
+      });
     }
   }
 
-  static getDerivedStateFromProps(props, state){
-    return { value: props.json || {}, warning: null};
+  async loadModelFile(file, type) {
+    let types;
+    let json;
+    let fqn = this.props.type;
+    try {
+      types = await this.generator.loadFromText(file);
+    // The model file was invalid
+    } catch (error){
+      console.error(error);
+      // Set default values to avoid trying to render a bad model
+      // Don't change the JSON, it might be valid once the model file is fixed
+      return { types: [] };
+    }
+
+    if(!types.map(t => t.getFullyQualifiedName()).includes(this.props.type)){
+      fqn = types[0].getFullyQualifiedName();
+      json = this.generateJSON(fqn);
+      return { types, json, fqn };
+    }
+    json = this.generateJSON(this.props.type);
+    return { types, json };
   }
 
-  // async componentDidMount(){
-  //   if (this.props.modelFile) {
-  //     await this.loadModelFile(this.props.modelFile, 'text');
-  //   }
+  _loadAsyncData() {
+    return this.loadModelFile(this.props.model, 'text');
+  }
 
-  //   if (this.props.modelUrl) {
-  //     await this.loadModelFile(this.props.modelUrl, 'url');
-  //   }
-  // }
-
-  // async componentDidUpdate(prevProps) {
-  //   if (prevProps.modelFile !== this.props.modelFile) {
-  //     await this.loadModelFile(this.props.modelFile, 'text');
-  //   }
-  //   if (prevProps.modelUrl !== this.props.modelUrl) {
-  //     await this.loadModelFile(this.props.modelUrl, 'url');
-  //   }
-  // }
+  static getDerivedStateFromProps(props, state){
+    return { value: props.json, warning: null};
+  }
 
   removeElement(e, key, index){
     const array = jsonpath.value(this.state.value, key);
@@ -118,7 +126,15 @@ class ConcertoForm extends Component {
   }
 
   generateJSON(type){
-    return this.generator.generateJSON(type);
+    // The type changed so we have to generate a new instance
+    if(this.props.json && !this.isInstanceOf(this.props.json, type)) {
+      return this.generator.generateJSON(type);
+    // The instance is null so we have to create a new instance
+    } else if(!this.props.json) {
+      return this.generator.generateJSON(type);
+    }
+    // Otherwise, just use what we already have
+    return this.props.json;
   }
 
   onFieldValueChange(e, key) {
@@ -128,8 +144,8 @@ class ConcertoForm extends Component {
   }
 
   renderForm(){
-    if (this.props.model && this.state.value) {
-      return this.generator.generateHTML(this.props.model, this.state.value);
+    if (this.props.type && this.state.value) {
+      return this.generator.generateHTML(this.props.type, this.state.value);
     }
     return null;
   }
@@ -144,9 +160,8 @@ class ConcertoForm extends Component {
 }
 
 ConcertoForm.propTypes = {
-  modelFile: PropTypes.string,
-  modelUrl: PropTypes.string,
   model: PropTypes.string,
+  type: PropTypes.string,
   json: PropTypes.object,
   onModelChange: PropTypes.func.isRequired,
   onValueChange: PropTypes.func.isRequired,
