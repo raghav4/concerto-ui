@@ -10,7 +10,8 @@
     "test": "CI=true react-scripts test",
     "eject": "react-scripts eject",
     "postlint": "npm run licchk",
-    "licchk": "license-check-and-add"
+    "licchk": "license-check-and-add",
+    "prepublishOnly": "npm run build"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -22,6 +23,8 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "@babel/cli": "7.4.3",
+    "@babel/core": "7.4.3",
     "license-check-and-add": "2.3.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",

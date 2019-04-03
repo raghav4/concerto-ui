@@ -15,7 +15,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "postlint": "npm run licchk",
-    "licchk": "license-check-and-add"
+    "licchk": "license-check-and-add",
+    "prepublishOnly": "npm run build"
   },
   "eslintConfig": {
     "extends": "react-app"
