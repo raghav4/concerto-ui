@@ -16,7 +16,6 @@
 const ModelManager = require('composer-concerto').ModelManager;
 const Factory = require('composer-concerto').Factory;
 const Serializer = require('composer-concerto').Serializer;
-const HTMLFormVisitor = require('./htmlformvisitor');
 
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
@@ -190,7 +189,6 @@ class FormGenerator {
 
             let visitor = params.visitor;
             if(!visitor){
-                visitor = new HTMLFormVisitor();
                 params.wrapHtmlForm = true;
             }
 
