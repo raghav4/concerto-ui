@@ -12,9 +12,9 @@
  * limitations under the License.
  */
 
-const React = require('react');
-const jsonpath = require('jsonpath');
-const {Utilities, HTMLFormVisitor} = require('concerto-form-core');
+import React from 'react';
+import jsonpath from 'jsonpath';
+import { Utilities, HTMLFormVisitor } from 'concerto-form-core';
 
 /**
  * Convert the contents of a ModelManager to TypeScript code.

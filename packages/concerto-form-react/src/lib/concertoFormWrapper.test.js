@@ -15,7 +15,6 @@
 import React from 'react';
 import ConcertoFormWrapper from './concertoFormWrapper';
 import { mount } from 'enzyme';
-// import {FormGenerator} from 'concerto-form-core';
 import waitUntil from 'async-wait-until';
 
 const options = {
@@ -137,5 +136,5 @@ test('Render form, no JSON provided',async () => {
   await waitUntil(() => onModelChange.mock.calls.length > 0, 500);
   expect(onModelChange.mock.calls[0][0].types).toHaveLength(3);
 
-  expect(component.html()).toMatchSnapshot();
+  expect(component.prop('json')).toBeDefined();
 });

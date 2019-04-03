@@ -12,7 +12,7 @@
 * limitations under the License.
 */
 
-'use strict';
+
 const ModelManager = require('composer-concerto').ModelManager;
 const Factory = require('composer-concerto').Factory;
 const Serializer = require('composer-concerto').Serializer;

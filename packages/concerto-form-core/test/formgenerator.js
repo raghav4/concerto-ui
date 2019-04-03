@@ -12,8 +12,6 @@
  * limitations under the License.
  */
 
-'use strict';
-
 const Generator = require('../lib/formgenerator');
 
 require('chai').should();

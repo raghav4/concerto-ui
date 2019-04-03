@@ -1,55 +1,57 @@
 {
   "name": "concerto-form-react",
   "version": "0.3.10",
-  "description": "Hyperledger Composer Form for generating a web form from a composer modeling language type",
-  "engines": {
-    "node": ">=8",
-    "npm": ">=5"
-  },
-  "private": false,
   "dependencies": {
-    "async-wait-until": "^1.2.4",
-    "concerto-form-core": "^0.3.10",
-    "jsonpath": "^1.0.1",
-    "prop-types": "^15.7.2",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "semantic-ui-react": "^0.83.0"
+    "concerto-form-core": "0.3.8",
+    "jsonpath": "1.0.1"
   },
   "scripts": {
+    "start": "react-scripts start",
+    "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files --ignore __tests__,spec.js,test.js,__snapshots__",
+    "test": "CI=true react-scripts test",
+    "test:watch": "react-scripts test",
+    "eject": "react-scripts eject",
     "pretest": "npm run lint",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "postlint": "npm run licchk",
-    "licchk": "license-check-and-add",
-    "postlicchk": "npm run doc",
-    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "jest",
-    "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "build": "babel ./src -d ./lib --copy-files"
+    "licchk": "license-check-and-add"
   },
-  "keywords": [
-    "blockchain",
-    "hyperledger",
-    "solutions"
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
   ],
-  "author": "Hyperledger Composer",
-  "license": "Apache-2.0",
   "devDependencies": {
-    "@babel/cli": "^7.4.3",
-    "@babel/core": "^7.4.3",
-    "@babel/preset-react": "^7.0.0",
-    "babel-jest": "^24.7.0",
-    "coveralls": "^3.0.3",
-    "enzyme": "^3.9.0",
-    "enzyme-adapter-react-16": "^1.11.2",
-    "eslint": "^3.19.0",
-    "eslint-plugin-jest": "^21.27.2",
-    "eslint-plugin-react": "^7.12.4",
-    "jest": "^24.7.0",
-    "jsdoc": "3.5.5",
-    "license-check-and-add": "2.3.1",
-    "nyc": "^11.1.0"
+    "@babel/cli": "7.4.3",
+    "@babel/core": "7.4.3",
+    "async-wait-until": "1.2.4",
+    "enzyme": "3.9.0",
+    "enzyme-adapter-react-16": "1.11.2",
+    "eslint-config-react-app": "3.0.8",
+    "eslint-plugin-flowtype": "3.4.2",
+    "eslint-plugin-import": "2.16.0",
+    "eslint-plugin-jsx-a11y": "6.2.1",
+    "eslint-plugin-react": "7.12.4",
+    "license-check-and-add": "2.3.6",
+    "prop-types": "15.7.2",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "2.1.8"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "URL_OF_YOUR_REPOSITORY"
   },
   "license-check-and-add-config": {
     "folder": ".",
@@ -59,17 +61,18 @@
       "coverage",
       "LICENSE.txt",
       "node_modules",
-      ".nyc-output",
       "out",
       ".git",
+      ".npmignore",
+      ".gitignore",
       "yarn.lock",
       "yarn-error.log",
       "README.md",
       ".babelrc",
-      "lib",
-      "src/__snapshots__",
-      ".DS_Store",
-      ".npmignore"
+      "dist",
+      "public",
+      "src/lib/__snapshots__",
+      ".DS_Store"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [
@@ -78,7 +81,7 @@
       ".zip",
       ".tgz"
     ],
-    "insert_license": false,
+    "insert_license": true,
     "license_formats": {
       "js|njk|pegjs|cto|acl|qry|css": {
         "prepend": "/*",
@@ -93,31 +96,5 @@
         }
       }
     }
-  },
-  "jest": {
-    "moduleFileExtensions": [
-      "js",
-      "json"
-    ],
-    "moduleDirectories": [
-      "node_modules",
-      "src"
-    ],
-    "moduleNameMapper": {
-      "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js"
-    },
-    "setupFilesAfterEnv": [
-      "<rootDir>/jestSetup.js"
-    ],
-    "collectCoverage": true,
-    "coverageDirectory": "./coverage/",
-    "coveragePathIgnorePatterns": [
-      "/node_modules/",
-      "/lib/"
-    ],
-    "testPathIgnorePatterns": [
-      "/node_modules/",
-      "/lib/"
-    ]
   }
 }
