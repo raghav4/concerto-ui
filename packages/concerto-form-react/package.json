@@ -1,8 +1,8 @@
 {
   "name": "concerto-form-react",
-  "version": "0.4.0-alpha.1",
+  "version": "0.4.0",
   "dependencies": {
-    "concerto-form-core": "^0.4.0-alpha.0",
+    "concerto-form-core": "^0.4.0",
     "jsonpath": "1.0.1"
   },
   "scripts": {
