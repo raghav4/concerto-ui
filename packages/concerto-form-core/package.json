@@ -10,8 +10,7 @@
     "test": "CI=true react-scripts test",
     "eject": "react-scripts eject",
     "postlint": "npm run licchk",
-    "licchk": "license-check-and-add",
-    "prepublishOnly": "npm run build"
+    "licchk": "license-check-and-add"
   },
   "eslintConfig": {
     "extends": "react-app"
@@ -74,6 +73,5 @@
         }
       }
     }
-  },
-  "gitHead": "250e3f3926a5d4f0c982cf34577a1ab0bc0a9470"
+  }
 }
