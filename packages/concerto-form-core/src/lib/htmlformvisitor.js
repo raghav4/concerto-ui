@@ -222,4 +222,4 @@ class HTMLFormVisitor {
     }
 }
 
-module.exports = HTMLFormVisitor;
+export default  HTMLFormVisitor;
