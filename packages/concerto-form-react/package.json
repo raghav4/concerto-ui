@@ -12,6 +12,7 @@
     "test:watch": "react-scripts test",
     "eject": "react-scripts eject",
     "pretest": "npm run lint",
+    "postinstall": "npm run build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "postlint": "npm run licchk",
