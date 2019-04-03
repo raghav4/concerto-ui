@@ -14,13 +14,11 @@
 
 const Generator = require('../lib/formgenerator');
 
-require('chai').should();
-
 describe('formgenerator Tests', function () {
     describe('#validation', function () {
         it('accepts a model string as input', async function () {
             const generator = new Generator();
-            generator.should.not.be.null;
+            expect(generator).not.toBeNull();
         });
     });
     describe('#instantiate', function () {
@@ -37,14 +35,14 @@ describe('formgenerator Tests', function () {
                 wrapHtmlForm: true,
             };
             const generator = new Generator(options);
-            generator.should.not.be.null;
+            expect(generator).not.toBeNull();
             await generator.loadFromText(text);
 
-            generator.getTypes().should.have.lengthOf(11);
+            expect(generator.getTypes()).toHaveLength(11);
 
             const json = generator.generateJSON('org.accordproject.finance.bond.Bond');
             const form = generator.generateHTML('org.accordproject.finance.bond.Bond', json);
-            form.should.contain('<form');
+            expect(form).toContain('<form');
         });
     });
 });

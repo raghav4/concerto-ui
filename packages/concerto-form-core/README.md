@@ -1,69 +1,68 @@
-# Hyperledger Composer Form Generator
+This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
 
-Hyperledger Composer Form is a form generator for Hyperledger composer.
+## Available Scripts
 
-The Hyperledger Composer modelling language is used by both Hyperledger Composer and Accord Project Cicero as an object-oriented data description (schema) language, based on a textual domain-specific language. Both communities would benefit from improved tooling for the modelling language, including the ability to generate UML style diagrams and web-forms from class descriptions described using the Hyperledger Composer modelling language.
+In the project directory, you can run:
 
-## Web Form Generator
+### `npm start`
 
-A web-form generated from model types would allow transactions to be submitted (or assets/participants created) by filling out a web-form, as opposed to submitting JSON formatted text, easing ease of use and guiding the user. The web form generator dynamically creates form elements based on a root type from a Hyperledger Composer model. Some simplifying assumptions are made to solve the issue of data-binding from arbitrarily complex object models to web forms. The generated web form generator is an embeddable, modular, component that can be easily embedded in web-based tools, such as Hyperledger Composer Playground, or similar.
+Runs the app in the development mode.<br>
+Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
 
-## How to use
+The page will reload if you make edits.<br>
+You will also see any lint errors in the console.
 
-- Import and set up `composer-form` and generate a form
-    ```js
-        import {FormGenerator} from `composer-form`
-        form = await FormGenerator.loadFromText(model);
-    ```
-- `model` is the source of the Concerto model
-- `form` is the generated html form
-- `options` format
+### `npm test`
 
-    ```js
-        const options = {
-            customClasses : {
-                field: 'form-group',
-                input: 'form-control',
-                label: 'control-label'
-            }
-        };
-    ```
+Launches the test runner in the interactive watch mode.<br>
+See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
 
-## Getting Started
+### `npm run build`
 
-- Clone this repository
-- `yarn install`
-- `yarn test`
+Builds the app for production to the `build` folder.<br>
+It correctly bundles React in production mode and optimizes the build for the best performance.
 
-### More Information
+The build is minified and the filenames include the hashes.<br>
+Your app is ready to be deployed!
 
-Modeling Language | Hyperledger Composer: https://hyperledger.github.io/composer/reference/cto_language.html
-GitHub - accordproject/cicero: Open Source implementation of Accord Protocol Template Specification: https://github.com/accordproject/cicero
-Hyperledger Composer: https://composer-playground.mybluemix.net
+See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-## What does this do
+### `npm run eject`
 
-- **Web-form Generator:** A functional dynamic web component, that generates a web-form based on the fully-qualified name of a type from a Hyperledger Composer Model. A sample web application that shows the dynamic web component in action.
+**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
 
-Suggested reading list is:
+If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-- [Introduction](https://hyperledger.github.io/composer/latest/introduction/introduction.html)
-- [Introduction Video](https://www.youtube.com/watch?v=fdFUsrsv5iw&t=23s)
-- [Quick Start](https://hyperledger.github.io/composer/latest/installing/installing-index.html)
-- [Tutorials](https://hyperledger.github.io/composer/latest/tutorials/tutorials.html)
+Instead, it will copy all the configuration files and the transitive dependencies (Webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
 
-## Getting in touch
+You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
 
-If you have a *question on using Hyperledger Composer*
-  - Rocket.Chat [discussion channels](https://chat.hyperledger.org/channel/composer)
-  - [Stack Overflow](http://stackoverflow.com/questions/tagged/hyperledger-composer), where the question should be tagged with 'hyperledger-composer'.
+## Learn More
 
-If you have found a defect or want to raise a feature requests
-  - All tracked on GitHub - please read [how to raise](./contrib-notes/raising-issues.md)
+You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
 
-If you want to contribute to the develop of Hyperledger Composer
-  - Come introduce yourself on the contributors [RocketChat channel](https://chat.hyperledger.org/channel/composer-dev)
-  - Please read the [contributing guide](./CONTRIBUTING.md)
+To learn React, check out the [React documentation](https://reactjs.org/).
 
-## License <a name="license"></a>
-Hyperledger Project source code files are made available under the Apache License, Version 2.0 (Apache-2.0), located in the LICENSE file. Hyperledger Project documentation files are made available under the Creative Commons Attribution 4.0 International License (CC-BY-4.0), available at http://creativecommons.org/licenses/by/4.0/.
+### Code Splitting
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/code-splitting
+
+### Analyzing the Bundle Size
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size
+
+### Making a Progressive Web App
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app
+
+### Advanced Configuration
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/advanced-configuration
+
+### Deployment
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/deployment
+
+### `npm run build` fails to minify
+
+This section has moved here: https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify

@@ -12,22 +12,18 @@
  * limitations under the License.
  */
 
-
-
 const Utilities = require('../lib/utilities');
-
-require('chai').should();
 
 describe('Utilities', function () {
     describe('#normalizeLabel', function () {
         it('accepts camelCase', async function () {
-            Utilities.normalizeLabel('camelCase').should.be.equal('Camel Case');
+            expect(Utilities.normalizeLabel('camelCase')).toEqual('Camel Case');
         });
         it('accepts camelABCCase', async function () {
-            Utilities.normalizeLabel('camelABCCase').should.be.equal('Camel ABC Case');
+            expect(Utilities.normalizeLabel('camelABCCase')).toEqual('Camel ABC Case');
         });
         it('accepts CamelCase', async function () {
-            Utilities.normalizeLabel('CamelCase').should.be.equal('Camel Case');
+            expect(Utilities.normalizeLabel('CamelCase')).toEqual('Camel Case');
         });
     });
 });

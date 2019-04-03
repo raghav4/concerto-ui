@@ -1,45 +1,38 @@
 {
   "name": "concerto-form-core",
-  "version": "0.4.2-alpha.1",
-  "description": "Hyperledger Composer Form for generating a web form from a composer modeling language type",
-  "engines": {
-    "node": ">=8",
-    "npm": ">=5"
-  },
-  "private": false,
+  "version": "0.1.0",
   "dependencies": {
     "composer-concerto": "^0.70.2"
   },
   "scripts": {
-    "pretest": "npm run lint",
-    "lint": "eslint .",
+    "start": "react-scripts start",
+    "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files --ignore __tests__,spec.js,test.js,__snapshots__",
+    "test": "CI=true react-scripts test",
+    "eject": "react-scripts eject",
     "postlint": "npm run licchk",
-    "licchk": "license-check-and-add",
-    "postlicchk": "npm run doc",
-    "mocha": "mocha --recursive -t 10000",
-    "nyc": "nyc mocha --recursive -t 10000",
-    "doc": "jsdoc --pedantic --recurse -c jsdoc.json",
-    "test": "nyc mocha --recursive -t 10000",
-    "coverage": "nyc report --reporter=text-lcov | coveralls"
+    "licchk": "license-check-and-add"
   },
-  "keywords": [
-    "blockchain",
-    "hyperledger",
-    "solutions"
+  "eslintConfig": {
+    "extends": "react-app"
+  },
+  "browserslist": [
+    ">0.2%",
+    "not dead",
+    "not ie <= 11",
+    "not op_mini all"
   ],
-  "author": "Hyperledger Composer",
-  "license": "Apache-2.0",
   "devDependencies": {
-    "chai": "3.5.0",
-    "chai-as-promised": "6.0.0",
-    "chai-things": "0.2.0",
-    "coveralls": "^3.0.3",
-    "eslint": "^5.16.0",
-    "jsdoc": "3.5.5",
-    "license-check-and-add": "2.3.1",
-    "mocha": "^6.0.2",
-    "nyc": "^13.3.0"
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "2.1.8",
+    "license-check-and-add": "2.3.1"
   },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "files": [
+    "dist",
+    "README.md"
+  ],
   "license-check-and-add-config": {
     "folder": ".",
     "license": "LICENSE.txt",
@@ -54,7 +47,10 @@
       "yarn.lock",
       "yarn-error.log",
       "README.md",
-      "uchi/out/model.uml"
+      ".babelrc",
+      ".gitignore",
+      "dist",
+      "public"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [
@@ -63,7 +59,6 @@
       ".zip",
       ".tgz"
     ],
-    "insert_license": false,
     "license_formats": {
       "js|njk|pegjs|cto|acl|qry": {
         "prepend": "/*",
@@ -78,33 +73,5 @@
         }
       }
     }
-  },
-  "nyc": {
-    "exclude": [
-      "coverage/**",
-      "lib/codegen/javascriptparser.js",
-      "lib/codegen/parsejs.js",
-      "lib/introspect/parser.js",
-      "lib/acl/parser.js",
-      "lib/query/parser.js",
-      "out/**",
-      "scripts/**",
-      "systest/**",
-      "test/**"
-    ],
-    "reporter": [
-      "lcov",
-      "json",
-      "text"
-    ],
-    "include": [
-      "lib/**.js"
-    ],
-    "all": true,
-    "check-coverage": true,
-    "statements": 75,
-    "branches": 65,
-    "functions": 75,
-    "lines": 75
   }
 }
