@@ -13,5 +13,6 @@
  */
 import FormGenerator from "./formgenerator";
 import HTMLFormVisitor from "./htmlformvisitor";
+import Utilities from "./utilities";
 
-export { FormGenerator, HTMLFormVisitor };
+export { FormGenerator, HTMLFormVisitor, Utilities };
