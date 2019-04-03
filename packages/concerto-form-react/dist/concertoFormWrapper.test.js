@@ -113,7 +113,7 @@ _regeneratorRuntime.mark(function _callee2() {
 
         case 5:
           expect(onModelChange.mock.calls[0][0].types).toHaveLength(3);
-          expect(component.html()).toMatchSnapshot();
+          expect(component.prop('json')).toBeDefined();
 
         case 7:
         case "end":
