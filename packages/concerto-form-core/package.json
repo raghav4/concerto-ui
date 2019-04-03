@@ -1,6 +1,6 @@
 {
   "name": "concerto-form-core",
-  "version": "0.1.0",
+  "version": "0.4.2-alpha.2",
   "dependencies": {
     "composer-concerto": "^0.70.2"
   },
@@ -22,10 +22,10 @@
     "not op_mini all"
   ],
   "devDependencies": {
+    "license-check-and-add": "2.3.1",
     "react": "^16.8.6",
     "react-dom": "^16.8.6",
-    "react-scripts": "2.1.8",
-    "license-check-and-add": "2.3.1"
+    "react-scripts": "2.1.8"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
