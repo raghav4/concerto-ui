@@ -1,6 +1,6 @@
 {
   "name": "concerto-form-core",
-  "version": "0.3.8",
+  "version": "0.4.0-alpha.0",
   "description": "Hyperledger Composer Form for generating a web form from a composer modeling language type",
   "engines": {
     "node": ">=8",
