@@ -13,11 +13,10 @@
 */
 
 'use strict';
-const axios = require('axios');
-const fs = require('fs');
 const ModelManager = require('composer-concerto').ModelManager;
 const Factory = require('composer-concerto').Factory;
 const Serializer = require('composer-concerto').Serializer;
+const HTMLFormVisitor = require('./htmlformvisitor');
 
 /**
 * Used to generate a web from from a given composer model. Accepts string or file
@@ -38,7 +37,6 @@ class FormGenerator {
     * @param {object} options.disabled - if true, all form fields will be disabled
     * @param {object} options.visitor - a class that extends HTMLFormVisitor that generates HTML, defaults to HTMLFormVisitor
     * @param {object} options.customClasses - a custom CSS classes that can be applied to generated HTML
-    * @param {boolean} options.wrapHtmlForm - if true, the result will be wrapped in a <form> tag
     * @param {ModelManager} options.modelManager - An optional custom model manager
     */
     constructor(options) {
@@ -64,6 +62,7 @@ class FormGenerator {
     /**
     * Load a model from text.
     * @param {String} text  - the model
+    * @returns {array} - A list of the types in the loaded model
     */
     async loadFromText(text) {
         this.loaded = false;
@@ -188,6 +187,17 @@ class FormGenerator {
                 json,
                 stack: [],
             }, this.options);
+
+            let visitor = params.visitor;
+            if(!visitor){
+                visitor = new HTMLFormVisitor();
+                params.wrapHtmlForm = true;
+            }
+
+            const form = classDeclaration.accept(visitor, params);
+            if(params.wrapHtmlForm){
+                return visitor.wrapHtmlForm(form, params);
+            }
 
             return classDeclaration.accept(params.visitor, params);
         }

@@ -8,15 +8,10 @@
   },
   "private": true,
   "dependencies": {
-    "composer-concerto": "^0.70.1",
-    "concerto-form-core": "^0.3.8",
     "concerto-form-react": "^0.3.9",
-    "jsonpath": "^1.0.0",
-    "react": "^16.4.1",
-    "react-bootstrap": "^0.32.1",
-    "react-bootstrap-tabs": "^1.0.2",
-    "react-dom": "^16.4.1",
-    "react-scripts": "1.1.4",
+    "react": "^16.8.6",
+    "react-dom": "^16.8.6",
+    "react-scripts": "^2.1.8",
     "semantic-ui-css": "^2.4.1",
     "semantic-ui-react": "^0.83.0"
   },
@@ -39,25 +34,9 @@
   "author": "Hyperledger Composer",
   "license": "Apache-2.0",
   "devDependencies": {
-    "ajv": "6.1.1",
-    "babel-preset-latest": "6.24.1",
-    "babelify": "7.3.0",
-    "browserfs": "1.1.0",
-    "chai": "3.5.0",
-    "chai-as-promised": "6.0.0",
-    "chai-things": "0.2.0",
-    "coveralls": "^3.0.1",
     "eslint": "3.17.1",
     "jsdoc": "3.5.5",
-    "license-check-and-add": "2.3.1",
-    "mocha": "3.4.2",
-    "mockery": "2.0.0",
-    "moxios": "0.4.0",
-    "nunjucks": "3.0.1",
-    "nyc": "^11.1.0",
-    "pegjs": "0.9.0",
-    "rimraf": "2.5.4",
-    "sinon": "2.3.8"
+    "license-check-and-add": "2.3.1"
   },
   "license-check-and-add-config": {
     "folder": ".",
@@ -75,7 +54,10 @@
       "README.md",
       "src/registerServiceWorker.js",
       "src/components/FormBuilder",
-      "public"
+      "public",
+      "config",
+      ".babelrc",
+      "dist"
     ],
     "file_type_method": "EXCLUDE",
     "file_types": [

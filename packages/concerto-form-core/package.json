@@ -8,10 +8,7 @@
   },
   "private": false,
   "dependencies": {
-    "axios": "^0.18.0",
-    "body-parser": "^1.18.3",
-    "composer-concerto": "^0.70",
-    "debug": "2.6.2"
+    "composer-concerto": "^0.70.2"
   },
   "scripts": {
     "pretest": "npm run lint",
@@ -33,25 +30,15 @@
   "author": "Hyperledger Composer",
   "license": "Apache-2.0",
   "devDependencies": {
-    "ajv": "6.1.1",
-    "babel-preset-latest": "6.24.1",
-    "babelify": "7.3.0",
-    "browserfs": "1.1.0",
     "chai": "3.5.0",
     "chai-as-promised": "6.0.0",
     "chai-things": "0.2.0",
-    "coveralls": "^3.0.1",
-    "eslint": "3.17.1",
+    "coveralls": "^3.0.3",
+    "eslint": "^5.16.0",
     "jsdoc": "3.5.5",
     "license-check-and-add": "2.3.1",
-    "mocha": "3.4.2",
-    "mockery": "2.0.0",
-    "moxios": "0.4.0",
-    "nunjucks": "3.0.1",
-    "nyc": "^11.1.0",
-    "pegjs": "0.9.0",
-    "rimraf": "2.5.4",
-    "sinon": "2.3.8"
+    "mocha": "^6.0.2",
+    "nyc": "^13.3.0"
   },
   "license-check-and-add-config": {
     "folder": ".",
@@ -116,7 +103,7 @@
     "all": true,
     "check-coverage": true,
     "statements": 75,
-    "branches": 75,
+    "branches": 65,
     "functions": 75,
     "lines": 75
   }

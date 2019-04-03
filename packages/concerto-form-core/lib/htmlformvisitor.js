@@ -168,7 +168,6 @@ class HTMLFormVisitor {
      * @private
      */
     visitRelationship(relationship, parameters) {
-        console.log('visiting relationship');
         const styles = parameters.customClasses;
         const div = `<div class="${''}">`;
         const label = `<label for="${relationship.getName()}">${relationship.getName()}:</label>`;
