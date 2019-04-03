@@ -79,12 +79,12 @@ class FormGenerator {
     getTypes(){
         if(this.loaded){
             return this.modelManager.getModelFiles()
-            .reduce((classDeclarations, modelFile) => {
-                return classDeclarations.concat(modelFile.getAllDeclarations());
-            }, [])
-            .filter(classDeclaration => {
-                return !classDeclaration.isEnum() && !classDeclaration.isAbstract();
-            });
+                .reduce((classDeclarations, modelFile) => {
+                    return classDeclarations.concat(modelFile.getAllDeclarations());
+                }, [])
+                .filter(classDeclaration => {
+                    return !classDeclaration.isEnum() && !classDeclaration.isAbstract();
+                });
         }
         return [];
     }

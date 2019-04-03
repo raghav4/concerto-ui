@@ -22,7 +22,7 @@ const {
     RelationshipDeclaration,
     EnumDeclaration,
     EnumValueDeclaration,
-  } = require('composer-concerto');
+} = require('composer-concerto');
 const util = require('util');
 const Writer = require('composer-concerto').Writer;
 
