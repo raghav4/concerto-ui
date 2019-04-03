@@ -4,8 +4,8 @@ import _classCallCheck from "@babel/runtime/helpers/esm/classCallCheck";
 import _createClass from "@babel/runtime/helpers/esm/createClass";
 import _possibleConstructorReturn from "@babel/runtime/helpers/esm/possibleConstructorReturn";
 import _getPrototypeOf from "@babel/runtime/helpers/esm/getPrototypeOf";
-import _assertThisInitialized from "@babel/runtime/helpers/esm/assertThisInitialized";
 import _inherits from "@babel/runtime/helpers/esm/inherits";
+import _assertThisInitialized from "@babel/runtime/helpers/esm/assertThisInitialized";
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -40,7 +40,7 @@ function (_Component) {
     _classCallCheck(this, ConcertoForm);
 
     _this = _possibleConstructorReturn(this, _getPrototypeOf(ConcertoForm).call(this, props));
-    _this.onFieldValueChange = _this.onFieldValueChange.bind(_assertThisInitialized(_this));
+    _this.onFieldValueChange = _this.onFieldValueChange.bind(_assertThisInitialized(_assertThisInitialized(_this)));
     _this.state = {
       // A mutable copy of this.props.json
       // This is needed so that we can use the jsonpath library to change object properties by key
