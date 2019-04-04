@@ -19,7 +19,7 @@ import _inherits from "@babel/runtime/helpers/esm/inherits";
  */
 import React from 'react';
 import jsonpath from 'jsonpath';
-import { Utilities, HTMLFormVisitor } from 'concerto-form-core';
+import { Utilities, HTMLFormVisitor } from 'concerto-ui-core';
 /**
  * Convert the contents of a ModelManager to TypeScript code.
  * All generated code is placed into the 'main' package. Set a

@@ -24,7 +24,7 @@ import React, { Component } from 'react';
 import ReactFormVisitor from './reactformvisitor';
 import './concertoForm.css';
 import jsonpath from 'jsonpath';
-import { FormGenerator } from 'concerto-form-core';
+import { FormGenerator } from 'concerto-ui-core';
 /**
  * This React component generates a React object for a bound model.
  */

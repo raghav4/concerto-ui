@@ -1,6 +1,6 @@
-# Concerto Form Generator
+# Concerto UI Library
 
-This library generates web-form generator for models written in the [Concerto Modelling Language](https://github.com/hyperledger/composer-concerto).
+This library providers web UI components for models written in the [Concerto Modelling Language](https://github.com/hyperledger/composer-concerto).
 
 <!--[![Coverage Status](https://coveralls.io/repos/github/accordproject/composer-form/badge.svg?branch=master)](https://coveralls.io/github/accordproject/composer-form?branch=master)
 
@@ -15,9 +15,9 @@ A web-form generated from model types would allow transactions to be submitted (
 ## How this project is structured
 
 Packages: 
-- `concerto-form-core`, includes the base visitor class and utility functions
-- `concerto-form-react`, extends the base visitor to provide a ReactJS form
-- `concerto-form-demo`, uses the react visitor and applies SemanticUI styling
+- `concerto-ui-core`, includes the base visitor class and utility functions
+- `concerto-ui-react`, extends the base visitor to provide a ReactJS form
+- `concerto-ui-demo`, uses the react visitor and applies SemanticUI styling
 
 ### More Information
 
@@ -47,7 +47,7 @@ lerna bootstrap
 Run the demo app and experiment with the form generator
 
 ```
-cd packages/concerto-form-demo
+cd packages/concerto-ui-demo
 npm run start
 ```
 

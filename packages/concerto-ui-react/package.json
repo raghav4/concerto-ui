@@ -1,8 +1,8 @@
 {
-  "name": "concerto-form-react",
+  "name": "@accordproject/concerto-ui-react",
   "version": "0.5.0",
   "dependencies": {
-    "concerto-form-core": "^0.5.0",
+    "@accordproject/concerto-ui-core": "^0.5.0",
     "jsonpath": "1.0.1"
   },
   "scripts": {
@@ -11,10 +11,7 @@
     "test": "CI=true react-scripts test",
     "test:watch": "react-scripts test",
     "eject": "react-scripts eject",
-    "pretest": "npm run lint",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
-    "postlint": "npm run licchk",
+    "pretest": "npm run licchk",
     "licchk": "license-check-and-add",
     "prepublishOnly": "npm run build"
   },
@@ -33,11 +30,6 @@
     "async-wait-until": "1.2.4",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.11.2",
-    "eslint-config-react-app": "3.0.8",
-    "eslint-plugin-flowtype": "3.4.2",
-    "eslint-plugin-import": "2.16.0",
-    "eslint-plugin-jsx-a11y": "6.2.1",
-    "eslint-plugin-react": "7.12.4",
     "license-check-and-add": "2.3.6",
     "prop-types": "15.7.2",
     "react": "^16.8.6",

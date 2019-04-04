@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-const Generator = require('../lib/formgenerator');
+import Generator from '../lib/formgenerator';
 
 describe('formgenerator Tests', function () {
     describe('#validation', function () {

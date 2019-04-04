@@ -14,7 +14,7 @@
 
 import React from 'react';
 import jsonpath from 'jsonpath';
-import { Utilities, HTMLFormVisitor } from 'concerto-form-core';
+import { Utilities, HTMLFormVisitor } from '@accordproject/concerto-ui-core';
 
 /**
  * Convert the contents of a ModelManager to TypeScript code.

@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-const Utilities = require('../lib/utilities');
+import Utilities from '../lib/utilities';
 
 describe('Utilities', function () {
     describe('#normalizeLabel', function () {

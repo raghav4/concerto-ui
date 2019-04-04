@@ -14,7 +14,7 @@
 
 import React, { Component, Message } from 'react';
 import './App.css';
-import { ConcertoForm } from 'concerto-form-react';
+import { ConcertoForm } from 'concerto-ui-react';
 import { Tab } from 'semantic-ui-react';
 
 class App extends Component {
@@ -109,7 +109,7 @@ class App extends Component {
     return (
       <div className="App container ui form">
         <h2>Concerto Form Generator - Demo Client</h2>
-        <p>This tool demonstrates the <em>concerto-form</em> library to generate a form from a Hyperledger Composer, Concerto model.</p>
+        <p>This tool demonstrates the <em>concerto-ui</em> library to generate a form from a Hyperledger Composer, Concerto model.</p>
         <p>This demo produces a ReactJS form that is styled with Semantic UI.</p>
         <Tab panes={panes} />
         <p>Choose a type from this dropdown to generate a form</p>

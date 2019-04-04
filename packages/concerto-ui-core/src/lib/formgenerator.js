@@ -12,11 +12,8 @@
 * limitations under the License.
 */
 
-
-const ModelManager = require('composer-concerto').ModelManager;
-const Factory = require('composer-concerto').Factory;
-const Serializer = require('composer-concerto').Serializer;
-const HTMLFormVisitor = require('./htmlformvisitor');
+import { ModelManager, Factory, Serializer } from 'composer-concerto';
+import HTMLFormVisitor from './htmlformvisitor';
 
 /**
 * Used to generate a web from from a given composer model. Accepts string or file

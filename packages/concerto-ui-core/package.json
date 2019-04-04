@@ -1,5 +1,5 @@
 {
-  "name": "concerto-form-core",
+  "name": "@accordproject/concerto-ui-core",
   "version": "0.5.0",
   "dependencies": {
     "composer-concerto": "^0.70.2"
