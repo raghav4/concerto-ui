@@ -28,7 +28,7 @@ class Utilities {
             .replace(/([a-z])([A-Z])/g, '$1 $2')
             .replace(/([A-Z])([a-z])/g, ' $1$2')
             .replace(/ +/g, ' ')
-            .replace(/^./, function(str){ return str.toUpperCase(); })
+            .replace(/^./, function(str){ return 'A'+str.toUpperCase(); })
             .trim();
     }
 }

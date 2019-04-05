@@ -1,5 +1,9 @@
-import _classCallCheck from "@babel/runtime/helpers/esm/classCallCheck";
-import _createClass from "@babel/runtime/helpers/esm/createClass";
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -18,29 +22,19 @@ import _createClass from "@babel/runtime/helpers/esm/createClass";
 /**
  *
  */
-var Utilities =
-/*#__PURE__*/
-function () {
-  function Utilities() {
-    _classCallCheck(this, Utilities);
+class Utilities {
+  /**
+   * Inserts correct spacing and capitalization to a camelCase label
+   * @param {string} labelName - the label text to be transformed
+   * @returns {string} - The label text formatted for rendering
+   */
+  static normalizeLabel(labelName) {
+    return labelName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([a-z])/g, ' $1$2').replace(/ +/g, ' ').replace(/^./, function (str) {
+      return 'A' + str.toUpperCase();
+    }).trim();
   }
 
-  _createClass(Utilities, null, [{
-    key: "normalizeLabel",
+}
 
-    /**
-     * Inserts correct spacing and capitalization to a camelCase label
-     * @param {string} labelName - the label text to be transformed
-     * @returns {string} - The label text formatted for rendering
-     */
-    value: function normalizeLabel(labelName) {
-      return labelName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([a-z])/g, ' $1$2').replace(/ +/g, ' ').replace(/^./, function (str) {
-        return str.toUpperCase();
-      }).trim();
-    }
-  }]);
-
-  return Utilities;
-}();
-
-export default Utilities;
+var _default = Utilities;
+exports.default = _default;

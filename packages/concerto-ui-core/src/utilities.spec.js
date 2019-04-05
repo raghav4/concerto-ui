@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import Utilities from '../lib/utilities';
+import Utilities from './utilities';
 
 describe('Utilities', function () {
     describe('#normalizeLabel', function () {

@@ -14,7 +14,7 @@
 
 import React, { Component, Message } from 'react';
 import './App.css';
-import { ConcertoForm } from 'concerto-ui-react';
+import { ConcertoForm } from '@accordproject/concerto-ui-react';
 import { Tab } from 'semantic-ui-react';
 
 class App extends Component {

@@ -1,28 +1,45 @@
 {
+	"name": "@accordproject/concerto-ui",
+	"private": true,
+	"workspaces": [
+		"packages/*"
+	],
 	"devDependencies": {
-		"lerna": "^2.11.0",
-		"semver": "6.0.0"
+		"@babel/cli": "^7.1.2",
+		"@babel/core": "^7.1.2",
+		"@babel/preset-env": "^7.1.0",
+		"@babel/preset-react": "^7.0.0",
+		"babel-core": "^7.0.0-bridge.0",
+		"babel-jest": "^23.6.0",
+		"babel-loader": "^8.0.5",
+		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+		"enzyme": "^3.7.0",
+		"enzyme-adapter-react-16": "^1.6.0",
+		"jest": "^23.6.0",
+		"lerna": "^3.13.1",
+		"react": "^16.6.0",
+		"react-dom": "^16.6.0",
+		"react-test-renderer": "^16.6.0"
 	},
-	"name": "composer-form",
-	"description": "Hyperledger Composer Form for generating a web form from a composer modeling language type. You must install [Lerna](https://lernajs.io) to build this multi-package repository.",
-	"version": "0.0.12",
-	"private": false,
 	"scripts": {
 		"install": "npm run bootstrap",
 		"repoclean": "lerna clean",
 		"bootstrap": "lerna bootstrap",
-		"test": "lerna run test"
+		"test": "lerna run test",
+		"build": "lerna exec -- npm run build",
+		"demo:react": "cd packages/concerto-ui-react-demo && npm run start"
+
 	},
 	"repository": {
 		"type": "git",
-		"url": "https://github.com/uchibeke/composer-form.git"
+		"url": "https://github.com/accordproject/concerto-ui.git"
 	},
 	"keywords": [
 		"blockchain",
 		"hyperledger",
 		"solutions"
 	],
-	"author": "Uchi Uchibeke, Matt Roberts",
+	"author": "Matt Roberts",
 	"license": "Apache-2.0",
 	"dependencies": {}
 }

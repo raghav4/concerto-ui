@@ -38,6 +38,7 @@ class FormGenerator {
     */
     constructor(options) {
         this.modelManager = new ModelManager();
+        // TODO Refactor this to an option to make this independent of Cicero
         this.modelManager.addModelFile(`namespace org.accordproject.base
         abstract asset Asset {  }
         abstract participant Participant {  }
@@ -50,7 +51,6 @@ class FormGenerator {
 
         this.options = Object.assign({includeSampleData: 'empty' }, options);
 
-        // this.modelManager = options.modelManager ? new options.modelManager() : new ModelManager();
         this.factory = new Factory(this.modelManager);
         this.serializer = new Serializer(this.factory, this.modelManager);
         this.loaded = false;

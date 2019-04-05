@@ -6,11 +6,9 @@
     "jsonpath": "1.0.1"
   },
   "scripts": {
-    "start": "react-scripts start",
-    "build": "rm -rf dist && NODE_ENV=production babel src/lib --out-dir dist --copy-files --ignore __tests__,spec.js,test.js,__snapshots__",
-    "test": "CI=true react-scripts test",
-    "test:watch": "react-scripts test",
-    "eject": "react-scripts eject",
+    "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist --copy-files --ignore '**/*.spec.js,**/*.test.js,samples,__snapshots__,**/*.stories.js'",
+    "watch": "npm run build -- --watch",
+    "test": "jest --coverage --verbose --color",
     "pretest": "npm run licchk",
     "licchk": "license-check-and-add",
     "prepublishOnly": "npm run build"
@@ -18,23 +16,16 @@
   "eslintConfig": {
     "extends": "react-app"
   },
-  "browserslist": [
-    ">0.2%",
-    "not dead",
-    "not ie <= 11",
-    "not op_mini all"
-  ],
   "devDependencies": {
     "@babel/cli": "7.4.3",
     "@babel/core": "7.4.3",
     "async-wait-until": "1.2.4",
+    "babel-jest": "24.7.1",
     "enzyme": "3.9.0",
     "enzyme-adapter-react-16": "1.11.2",
+    "jest": "24.7.1",
     "license-check-and-add": "2.3.6",
-    "prop-types": "15.7.2",
-    "react": "^16.8.6",
-    "react-dom": "^16.8.6",
-    "react-scripts": "2.1.8"
+    "prop-types": "15.7.2"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
@@ -44,7 +35,19 @@
   ],
   "repository": {
     "type": "git",
-    "url": "URL_OF_YOUR_REPOSITORY"
+    "url": "https://github.com/accordproject/concerto-ui.git"
+  },
+  "jest": {
+    "setupFiles": [
+      "./setupTests.js"
+    ],
+    "testPathIgnorePatterns": [
+      "/node_modules/",
+      "/dist/"
+    ],
+    "moduleNameMapper": {
+      "\\.(css|less)$": "<rootDir>/__mocks__/styleMock.js"
+    }
   },
   "license-check-and-add-config": {
     "folder": ".",
@@ -64,7 +67,7 @@
       ".babelrc",
       "dist",
       "public",
-      "src/lib/__snapshots__",
+      "src/__snapshots__",
       ".DS_Store"
     ],
     "file_type_method": "EXCLUDE",
@@ -74,7 +77,7 @@
       ".zip",
       ".tgz"
     ],
-    "insert_license": true,
+    "insert_license": false,
     "license_formats": {
       "js|njk|pegjs|cto|acl|qry|css": {
         "prepend": "/*",
@@ -89,6 +92,5 @@
         }
       }
     }
-  },
-  "gitHead": "250e3f3926a5d4f0c982cf34577a1ab0bc0a9470"
+  }
 }

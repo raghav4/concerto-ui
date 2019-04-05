@@ -12,7 +12,7 @@
  * limitations under the License.
  */
 
-import Generator from '../lib/formgenerator';
+import Generator from './formgenerator';
 
 describe('formgenerator Tests', function () {
     describe('#validation', function () {

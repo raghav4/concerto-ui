@@ -38,17 +38,17 @@ If not already installed, install lerna
 npm i -g lerna
 ```
 
-Install all of the project's dependencies
+Install all of the project's dependencies and build each of the components
 
 ```
 lerna bootstrap
+npm run build
 ```
 
 Run the demo app and experiment with the form generator
 
 ```
-cd packages/concerto-ui-demo
-npm run start
+npm run demo:react
 ```
 
 ## License <a name="license"></a>

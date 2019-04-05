@@ -1,11 +1,25 @@
-import _regeneratorRuntime from "@babel/runtime/regenerator";
-import _asyncToGenerator from "@babel/runtime/helpers/esm/asyncToGenerator";
-import _classCallCheck from "@babel/runtime/helpers/esm/classCallCheck";
-import _createClass from "@babel/runtime/helpers/esm/createClass";
-import _possibleConstructorReturn from "@babel/runtime/helpers/esm/possibleConstructorReturn";
-import _getPrototypeOf from "@babel/runtime/helpers/esm/getPrototypeOf";
-import _inherits from "@babel/runtime/helpers/esm/inherits";
-import _assertThisInitialized from "@babel/runtime/helpers/esm/assertThisInitialized";
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.default = void 0;
+
+var _react = _interopRequireWildcard(require("react"));
+
+var _reactformvisitor = _interopRequireDefault(require("./reactformvisitor"));
+
+require("./concertoForm.css");
+
+var _propTypes = _interopRequireDefault(require("prop-types"));
+
+var _jsonpath = _interopRequireDefault(require("jsonpath"));
+
+var _concertoUiCore = require("@accordproject/concerto-ui-core");
+
+function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
+
+function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) { var desc = Object.defineProperty && Object.getOwnPropertyDescriptor ? Object.getOwnPropertyDescriptor(obj, key) : {}; if (desc.get || desc.set) { Object.defineProperty(newObj, key, desc); } else { newObj[key] = obj[key]; } } } } newObj.default = obj; return newObj; } }
 
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -20,39 +34,26 @@ import _assertThisInitialized from "@babel/runtime/helpers/esm/assertThisInitial
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import React, { Component } from 'react';
-import ReactFormVisitor from './reactformvisitor';
-import './concertoForm.css';
-import jsonpath from 'jsonpath';
-import { FormGenerator } from 'concerto-ui-core';
+
 /**
  * This React component generates a React object for a bound model.
  */
-
-var ConcertoForm =
-/*#__PURE__*/
-function (_Component) {
-  _inherits(ConcertoForm, _Component);
-
-  function ConcertoForm(props) {
-    var _this;
-
-    _classCallCheck(this, ConcertoForm);
-
-    _this = _possibleConstructorReturn(this, _getPrototypeOf(ConcertoForm).call(this, props));
-    _this.onFieldValueChange = _this.onFieldValueChange.bind(_assertThisInitialized(_assertThisInitialized(_this)));
-    _this.state = {
+class ConcertoForm extends _react.Component {
+  constructor(props) {
+    super(props);
+    this.onFieldValueChange = this.onFieldValueChange.bind(this);
+    this.state = {
       // A mutable copy of this.props.json
       // This is needed so that we can use the jsonpath library to change object properties by key
       // using the jsonpath module, without modifying the props object
       value: null
     }; // Default values which can be overridden by parent components
 
-    _this.options = Object.assign({
+    this.options = Object.assign({
       includeOptionalFields: true,
       includeSampleData: 'sample',
       disabled: props.readOnly,
-      visitor: new ReactFormVisitor(),
+      visitor: new _reactformvisitor.default(),
       // CSS Styling, specify classnames
       customClasses: {
         field: 'ui field',
@@ -63,179 +64,140 @@ function (_Component) {
         boolean: 'ui toggle checkbox',
         button: 'ui fluid button'
       },
-      onFieldValueChange: function onFieldValueChange(e, key) {
-        _this.onFieldValueChange(e, key);
+      onFieldValueChange: (e, key) => {
+        this.onFieldValueChange(e, key);
       },
-      addElement: function addElement(e, key, field) {
-        _this.addElement(e, key, field);
+      addElement: (e, key, field) => {
+        this.addElement(e, key, field);
       },
-      removeElement: function removeElement(e, key, index) {
-        _this.removeElement(e, key, index);
+      removeElement: (e, key, index) => {
+        this.removeElement(e, key, index);
       }
     }, props.options);
-    _this.generator = new FormGenerator(_this.options);
-    return _this;
+    this.generator = new _concertoUiCore.FormGenerator(this.options);
   }
 
-  _createClass(ConcertoForm, [{
-    key: "componentDidMount",
-    value: function componentDidMount() {
-      var _this2 = this;
+  componentDidMount() {
+    this._loadAsyncData().then(modelProps => {
+      this.props.onModelChange(modelProps);
+    });
+  }
 
-      this._loadAsyncData().then(function (modelProps) {
-        _this2.props.onModelChange(modelProps);
+  componentDidUpdate(prevProps) {
+    if (this.props.model !== prevProps.model) {
+      this._loadAsyncData().then(modelProps => {
+        this.props.onModelChange(modelProps);
       });
     }
-  }, {
-    key: "componentDidUpdate",
-    value: function componentDidUpdate(prevProps) {
-      var _this3 = this;
+  }
 
-      if (this.props.model !== prevProps.model) {
-        this._loadAsyncData().then(function (modelProps) {
-          _this3.props.onModelChange(modelProps);
-        });
-      }
-    }
-  }, {
-    key: "loadModelFile",
-    value: function () {
-      var _loadModelFile = _asyncToGenerator(
-      /*#__PURE__*/
-      _regeneratorRuntime.mark(function _callee(file, type) {
-        var types, json, fqn;
-        return _regeneratorRuntime.wrap(function _callee$(_context) {
-          while (1) {
-            switch (_context.prev = _context.next) {
-              case 0:
-                fqn = this.props.type;
-                _context.prev = 1;
-                _context.next = 4;
-                return this.generator.loadFromText(file);
+  async loadModelFile(file, type) {
+    let types;
+    let json;
+    let fqn = this.props.type;
 
-              case 4:
-                types = _context.sent;
-                _context.next = 11;
-                break;
+    try {
+      types = await this.generator.loadFromText(file); // The model file was invalid
+    } catch (error) {
+      console.error(error); // Set default values to avoid trying to render a bad model
+      // Don't change the JSON, it might be valid once the model file is fixed
 
-              case 7:
-                _context.prev = 7;
-                _context.t0 = _context["catch"](1);
-                console.error(_context.t0); // Set default values to avoid trying to render a bad model
-                // Don't change the JSON, it might be valid once the model file is fixed
-
-                return _context.abrupt("return", {
-                  types: []
-                });
-
-              case 11:
-                if (types.map(function (t) {
-                  return t.getFullyQualifiedName();
-                }).includes(this.props.type)) {
-                  _context.next = 15;
-                  break;
-                }
-
-                fqn = types[0].getFullyQualifiedName();
-                json = this.generateJSON(fqn);
-                return _context.abrupt("return", {
-                  types: types,
-                  json: json,
-                  fqn: fqn
-                });
-
-              case 15:
-                json = this.generateJSON(this.props.type);
-                return _context.abrupt("return", {
-                  types: types,
-                  json: json
-                });
-
-              case 17:
-              case "end":
-                return _context.stop();
-            }
-          }
-        }, _callee, this, [[1, 7]]);
-      }));
-
-      function loadModelFile(_x, _x2) {
-        return _loadModelFile.apply(this, arguments);
-      }
-
-      return loadModelFile;
-    }()
-  }, {
-    key: "_loadAsyncData",
-    value: function _loadAsyncData() {
-      return this.loadModelFile(this.props.model, 'text');
-    }
-  }, {
-    key: "removeElement",
-    value: function removeElement(e, key, index) {
-      var array = jsonpath.value(this.state.value, key);
-      array.splice(index, 1);
-      this.props.onValueChange(this.state.value);
-    }
-  }, {
-    key: "addElement",
-    value: function addElement(e, key, value) {
-      var array = jsonpath.value(this.state.value, key);
-      jsonpath.value(this.state.value, "".concat(key, ".").concat(array.length), value);
-      this.props.onValueChange(this.state.value);
-    }
-  }, {
-    key: "isInstanceOf",
-    value: function isInstanceOf(model, type) {
-      return this.generator.isInstanceOf(model, type);
-    }
-  }, {
-    key: "generateJSON",
-    value: function generateJSON(type) {
-      // The type changed so we have to generate a new instance
-      if (this.props.json && !this.isInstanceOf(this.props.json, type)) {
-        return this.generator.generateJSON(type); // The instance is null so we have to create a new instance
-      } else if (!this.props.json) {
-        return this.generator.generateJSON(type);
-      } // Otherwise, just use what we already have
-
-
-      return this.props.json;
-    }
-  }, {
-    key: "onFieldValueChange",
-    value: function onFieldValueChange(e, key) {
-      var value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-      jsonpath.value(this.state.value, key, value);
-      this.props.onValueChange(this.state.value);
-    }
-  }, {
-    key: "renderForm",
-    value: function renderForm() {
-      if (this.props.type && this.state.value) {
-        return this.generator.generateHTML(this.props.type, this.state.value);
-      }
-
-      return null;
-    }
-  }, {
-    key: "render",
-    value: function render() {
-      return React.createElement("form", {
-        className: "ui form"
-      }, this.renderForm());
-    }
-  }], [{
-    key: "getDerivedStateFromProps",
-    value: function getDerivedStateFromProps(props, state) {
       return {
-        value: props.json,
-        warning: null
+        types: []
       };
     }
-  }]);
 
-  return ConcertoForm;
-}(Component);
+    if (!types.map(t => t.getFullyQualifiedName()).includes(this.props.type)) {
+      fqn = types[0].getFullyQualifiedName();
+      json = this.generateJSON(fqn);
+      return {
+        types,
+        json,
+        fqn
+      };
+    }
 
-export default ConcertoForm;
+    json = this.generateJSON(this.props.type);
+    return {
+      types,
+      json
+    };
+  }
+
+  _loadAsyncData() {
+    return this.loadModelFile(this.props.model, 'text');
+  }
+
+  static getDerivedStateFromProps(props, state) {
+    return {
+      value: props.json,
+      warning: null
+    };
+  }
+
+  removeElement(e, key, index) {
+    const array = _jsonpath.default.value(this.state.value, key);
+
+    array.splice(index, 1);
+    this.props.onValueChange(this.state.value);
+  }
+
+  addElement(e, key, value) {
+    const array = _jsonpath.default.value(this.state.value, key);
+
+    _jsonpath.default.value(this.state.value, `${key}.${array.length}`, value);
+
+    this.props.onValueChange(this.state.value);
+  }
+
+  isInstanceOf(model, type) {
+    return this.generator.isInstanceOf(model, type);
+  }
+
+  generateJSON(type) {
+    // The type changed so we have to generate a new instance
+    if (this.props.json && !this.isInstanceOf(this.props.json, type)) {
+      return this.generator.generateJSON(type); // The instance is null so we have to create a new instance
+    } else if (!this.props.json) {
+      return this.generator.generateJSON(type);
+    } // Otherwise, just use what we already have
+
+
+    return this.props.json;
+  }
+
+  onFieldValueChange(e, key) {
+    const value = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
+
+    _jsonpath.default.value(this.state.value, key, value);
+
+    this.props.onValueChange(this.state.value);
+  }
+
+  renderForm() {
+    if (this.props.type && this.state.value) {
+      return this.generator.generateHTML(this.props.type, this.state.value);
+    }
+
+    return null;
+  }
+
+  render() {
+    return _react.default.createElement("form", {
+      className: "ui form"
+    }, this.renderForm());
+  }
+
+}
+
+ConcertoForm.propTypes = {
+  model: _propTypes.default.string,
+  type: _propTypes.default.string,
+  json: _propTypes.default.object,
+  onModelChange: _propTypes.default.func.isRequired,
+  onValueChange: _propTypes.default.func.isRequired,
+  options: _propTypes.default.object,
+  readOnly: _propTypes.default.bool
+};
+var _default = ConcertoForm;
+exports.default = _default;

@@ -16,79 +16,7 @@ import React from 'react';
 import ConcertoFormWrapper from './concertoFormWrapper';
 import { mount } from 'enzyme';
 import waitUntil from 'async-wait-until';
-
-const options = {
-  includeOptionalFields: true,
-  includeSampleData: 'sample'
-};
-let model = `namespace org.hyperledger.concerto.form.test
-
-concept Foo {
-  o String s
-  o Boolean b optional
-  o DateTime dt
-  o Integer i
-  o Double d
-  o Bar bar
-  o String[] ss
-  o Boolean[] bs
-  o DateTime[] dts
-  o Bar[] bars
-  o Nums n
-  --> MyAsset ref
-}
-
-enum Nums {
-  o ONE
-  o TWO
-}
-
-abstract concept Bar {
-  o String s
-}
-
-concept Baz extends Bar{
-  o String t
-}
-
-asset MyAsset identified by id {
-  o String id
-}
-`;
-
-let type = 'org.hyperledger.concerto.form.test.Foo';
-
-let json = {
-  '$class': 'org.hyperledger.concerto.form.test.Foo',
-  's': 'Ullamco eiusmod laborum.',
-  'b': true,
-  'dt': '2019-04-03T10:26:11.168+01:00',
-  'i': 27587,
-  'd': 70.808,
-  'bar': {
-    '$class': 'org.hyperledger.concerto.form.test.Baz',
-    't': 'Enim.',
-    's': 'Magna amet sit.'
-  },
-  'ss': [
-    'Consectetur enim laborum Lorem fugiat.'
-  ],
-  'bs': [
-    false
-  ],
-  'dts': [
-    '2019-04-03T10:26:11.168+01:00'
-  ],
-  'bars': [
-    {
-      '$class': 'org.hyperledger.concerto.form.test.Baz',
-      't': 'Laborum.',
-      's': 'Ut mollit.'
-    }
-  ],
-  'n': 'ONE',
-  'ref': 'resource:org.hyperledger.concerto.form.test.MyAsset#2256'
-};
+import { props, type, model, options } from './testProps'
 
 test('Render form, default',async () => {
   let component;
@@ -102,10 +30,7 @@ test('Render form, default',async () => {
     <ConcertoFormWrapper
       onModelChange={onModelChange}
       onValueChange={onValueChange}
-      type={type}
-      model={model}
-      json={json}
-      options={options}
+      {...props}
     />,
   );
 
