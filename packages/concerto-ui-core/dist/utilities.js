@@ -29,9 +29,7 @@ class Utilities {
    * @returns {string} - The label text formatted for rendering
    */
   static normalizeLabel(labelName) {
-    return labelName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([a-z])/g, ' $1$2').replace(/ +/g, ' ').replace(/^./, function (str) {
-      return 'A' + str.toUpperCase();
-    }).trim();
+    return labelName.replace(/([a-z])([A-Z])/g, '$1 $2').replace(/([A-Z])([a-z])/g, ' $1$2').replace(/ +/g, ' ').replace(/^./, str => str.toUpperCase()).trim();
   }
 
 }

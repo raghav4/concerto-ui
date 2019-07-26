@@ -94,6 +94,10 @@ class ConcertoForm extends Component {
       return { types: [] };
     }
 
+    if(types.length === 0){
+      return { types: [] };
+    }
+
     if(!types.map(t => t.getFullyQualifiedName()).includes(this.props.type)){
       fqn = types[0].getFullyQualifiedName();
       json = this.generateJSON(fqn);
@@ -162,7 +166,7 @@ class ConcertoForm extends Component {
 }
 
 ConcertoForm.propTypes = {
-  models: PropTypes.array,
+  models: PropTypes.arrayOf(PropTypes.string).isRequired,
   type: PropTypes.string,
   json: PropTypes.object,
   onModelChange: PropTypes.func.isRequired,

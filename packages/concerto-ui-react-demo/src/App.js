@@ -32,7 +32,12 @@ class App extends Component {
       types: [],
 
       // Source model file text
-      model: '',
+      model: `namespace matt
+
+      concept foo {
+      
+      o String bar 
+      }`,
 
       // Rendering options
       options: {
@@ -101,7 +106,7 @@ class App extends Component {
         onModelChange={this.onModelChange}
         onValueChange={this.onValueChange}
         type={this.state.fqn}
-        model={this.state.model}
+        models={[this.state.model]}
         json={this.state.json}
         options={this.state.options}
       />;
