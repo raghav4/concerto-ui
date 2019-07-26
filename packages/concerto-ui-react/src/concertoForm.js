@@ -73,7 +73,7 @@ class ConcertoForm extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (!isEqual(this.props.model,prevProps.model)) {
+    if (!isEqual(this.props.models,prevProps.models)) {
       this._loadAsyncData().then((modelProps) => {
         this.props.onModelChange(modelProps);
       });
@@ -88,7 +88,6 @@ class ConcertoForm extends Component {
       types = await this.generator.loadFromText(files);
     // The model file was invalid
     } catch (error){
-      console.error(error);
       // Set default values to avoid trying to render a bad model
       // Don't change the JSON, it might be valid once the model file is fixed
       return { types: [] };
@@ -166,7 +165,7 @@ class ConcertoForm extends Component {
 }
 
 ConcertoForm.propTypes = {
-  models: PropTypes.arrayOf(PropTypes.string).isRequired,
+  models: PropTypes.arrayOf(PropTypes.string),
   type: PropTypes.string,
   json: PropTypes.object,
   onModelChange: PropTypes.func.isRequired,

@@ -40,7 +40,7 @@ class ConcertoFormWrapper extends Component {
 }
 
 ConcertoFormWrapper.propTypes = {
-  model: PropTypes.string,
+  models: PropTypes.arrayOf(PropTypes.string).isRequired,
   type: PropTypes.string,
   json: PropTypes.object,
   onModelChange: PropTypes.func.isRequired,

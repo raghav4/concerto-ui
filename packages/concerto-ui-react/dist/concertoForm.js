@@ -86,7 +86,7 @@ class ConcertoForm extends _react.Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (!(0, _lodash.default)(this.props.model, prevProps.model)) {
+    if (!(0, _lodash.default)(this.props.models, prevProps.models)) {
       this._loadAsyncData().then(modelProps => {
         this.props.onModelChange(modelProps);
       });
@@ -101,9 +101,8 @@ class ConcertoForm extends _react.Component {
     try {
       types = await this.generator.loadFromText(files); // The model file was invalid
     } catch (error) {
-      console.error(error); // Set default values to avoid trying to render a bad model
+      // Set default values to avoid trying to render a bad model
       // Don't change the JSON, it might be valid once the model file is fixed
-
       return {
         types: []
       };
@@ -199,7 +198,7 @@ class ConcertoForm extends _react.Component {
 }
 
 ConcertoForm.propTypes = {
-  models: _propTypes.default.arrayOf(_propTypes.default.string).isRequired,
+  models: _propTypes.default.arrayOf(_propTypes.default.string),
   type: _propTypes.default.string,
   json: _propTypes.default.object,
   onModelChange: _propTypes.default.func.isRequired,

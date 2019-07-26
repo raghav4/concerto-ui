@@ -45,7 +45,7 @@ class ErrorBoundary extends _react.default.Component {
     if (this.state.error) {
       return _react.default.createElement(_react.Message, {
         warning: true
-      }, _react.default.createElement("p", null, this.state.error));
+      }, _react.default.createElement("h1", null, "matt"), _react.default.createElement("pre", null, this.state.error));
     }
 
     return this.props.children;

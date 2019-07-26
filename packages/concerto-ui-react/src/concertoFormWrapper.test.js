@@ -53,7 +53,7 @@ test('Render form, no JSON provided',async () => {
       onModelChange={onModelChange}
       onValueChange={onValueChange}
       type={type}
-      model={model}
+      models={[model]}
       options={options}
     />,
   );

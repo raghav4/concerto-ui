@@ -88,7 +88,7 @@ class App extends Component {
         <form>
           <div className="ui form">
             <textarea
-              value={[this.state.model]}
+              value={this.state.model}
               onChange={this.handleModelTextAreaChange.bind(this)}
               className={'form-control Text-area'}
               placeholder="Paste a model file"/>

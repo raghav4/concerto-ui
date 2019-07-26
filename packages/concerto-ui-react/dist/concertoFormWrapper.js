@@ -42,7 +42,7 @@ class ConcertoFormWrapper extends _react.Component {
 }
 
 ConcertoFormWrapper.propTypes = {
-  model: _propTypes.default.string,
+  models: _propTypes.default.arrayOf(_propTypes.default.string).isRequired,
   type: _propTypes.default.string,
   json: _propTypes.default.object,
   onModelChange: _propTypes.default.func.isRequired,
