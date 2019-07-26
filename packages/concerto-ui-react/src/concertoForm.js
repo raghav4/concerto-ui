@@ -18,6 +18,7 @@ import './concertoForm.css';
 import PropTypes from 'prop-types';
 import jsonpath from 'jsonpath';
 import { FormGenerator } from '@accordproject/concerto-ui-core';
+import isEqual from 'lodash.isequal';
 
 /**
  * This React component generates a React object for a bound model.
@@ -72,19 +73,19 @@ class ConcertoForm extends Component {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.props.model !== prevProps.model) {
+    if (!isEqual(this.props.model,prevProps.model)) {
       this._loadAsyncData().then((modelProps) => {
         this.props.onModelChange(modelProps);
       });
     }
   }
 
-  async loadModelFile(file, type) {
+  async loadModelFiles(files, type) {
     let types;
     let json;
     let fqn = this.props.type;
     try {
-      types = await this.generator.loadFromText(file);
+      types = await this.generator.loadFromText(files);
     // The model file was invalid
     } catch (error){
       console.error(error);
@@ -103,7 +104,7 @@ class ConcertoForm extends Component {
   }
 
   _loadAsyncData() {
-    return this.loadModelFile(this.props.model, 'text');
+    return this.loadModelFiles(this.props.models, 'text');
   }
 
   static getDerivedStateFromProps(props, state){
@@ -161,7 +162,7 @@ class ConcertoForm extends Component {
 }
 
 ConcertoForm.propTypes = {
-  model: PropTypes.string,
+  models: PropTypes.array,
   type: PropTypes.string,
   json: PropTypes.object,
   onModelChange: PropTypes.func.isRequired,

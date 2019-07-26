@@ -57,14 +57,14 @@ class FormGenerator {
     }
 
     /**
-    * Load a model from text.
-    * @param {String} text  - the model
+    * Load models from text.
+    * @param {String} texts  - the models
     * @returns {array} - A list of the types in the loaded model
     */
-    async loadFromText(text) {
+    async loadFromText(texts) {
         this.loaded = false;
         this.modelManager.clearModelFiles();
-        this.modelManager.addModelFile(text, undefined, true);
+        this.modelManager.addModelFiles(text, [], true);
         this.loaded = true;
         return this.getTypes();
     }

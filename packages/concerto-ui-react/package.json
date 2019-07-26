@@ -3,7 +3,8 @@
   "version": "0.71.2",
   "dependencies": {
     "@accordproject/concerto-ui-core": "^0.71.2",
-    "jsonpath": "1.0.1"
+    "jsonpath": "1.0.1",
+    "lodash.isequal": "^4.5.0"
   },
   "scripts": {
     "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist --copy-files --ignore '**/*.spec.js,**/*.test.js,samples,__snapshots__,**/*.stories.js'",
