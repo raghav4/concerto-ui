@@ -65,7 +65,6 @@ class FormGenerator {
         this.loaded = false;
         this.modelManager.clearModelFiles();
         this.modelManager.addModelFile(text, undefined, true);
-        await this.modelManager.updateExternalModels();
         this.loaded = true;
         return this.getTypes();
     }
