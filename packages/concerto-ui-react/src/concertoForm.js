@@ -157,7 +157,7 @@ class ConcertoForm extends Component {
 
   render() {
     return (
-        <form className="ui form">
+        <form className="ui form" style={this.props.style}>
           {this.renderForm()}
         </form>
     );
@@ -172,6 +172,7 @@ ConcertoForm.propTypes = {
   onValueChange: PropTypes.func.isRequired,
   options: PropTypes.object,
   readOnly: PropTypes.bool,
+  style: PropTypes.object,
 };
 
 export default ConcertoForm;

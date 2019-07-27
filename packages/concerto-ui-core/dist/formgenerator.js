@@ -74,11 +74,14 @@ class FormGenerator {
 
   async loadFromText(texts) {
     this.loaded = false;
-    this.modelManager.clearModelFiles();
-    texts.map(text => {
-      this.modelManager.addModelFile(text, null, true);
-    });
-    this.modelManager.validateModelFiles();
+
+    try {
+      this.modelManager.addModelFiles(texts, new Array(texts.length));
+    } catch (error) {
+      console.error(error);
+      return [];
+    }
+
     this.loaded = true;
     return this.getTypes();
   }

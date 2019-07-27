@@ -191,7 +191,8 @@ class ConcertoForm extends _react.Component {
 
   render() {
     return _react.default.createElement("form", {
-      className: "ui form"
+      className: "ui form",
+      style: this.props.style
     }, this.renderForm());
   }
 
@@ -204,7 +205,8 @@ ConcertoForm.propTypes = {
   onModelChange: _propTypes.default.func.isRequired,
   onValueChange: _propTypes.default.func.isRequired,
   options: _propTypes.default.object,
-  readOnly: _propTypes.default.bool
+  readOnly: _propTypes.default.bool,
+  style: _propTypes.default.object
 };
 var _default = ConcertoForm;
 exports.default = _default;
