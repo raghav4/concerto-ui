@@ -1,6 +1,6 @@
 {
   "name": "@accordproject/concerto-ui-core",
-  "version": "0.71.5",
+  "version": "0.71.6",
   "dependencies": {
     "composer-concerto": "^0.71.3"
   },
