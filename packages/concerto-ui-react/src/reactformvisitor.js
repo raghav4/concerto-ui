@@ -176,25 +176,37 @@ class ReactFormVisitor extends HTMLFormVisitor {
       component = (<div className={style} key={field.getName()+'_wrapper'}>
                 <label>{Utilities.normalizeLabel(field.getName())}</label>
                 <fieldset>
-                    {value.map((element, index) => {
-                      parameters.stack.push(index);
-                      const arrayComponent = (
-                            <div key={field.getName()+'_wrapper['+index+']'}>
-                                {arrayField(field, parameters)}
-                                <input type='button'
-                                    className={styles.button}
-                                    value='Delete'
-                                    onClick={(e)=>{parameters.removeElement(e, key, index);}} />
-                            </div>
-                        );
-                      parameters.stack.pop();
-                      return arrayComponent;
-                    })}
+                  {value.map((element, index) => {
+                    parameters.stack.push(index);
+                    const arrayComponent = (
+                      <div style={{display:'grid', gridTemplateColumns: 'auto 36px', gridColumnGap: '5px'}} key={field.getName()+'_wrapper['+index+']'}>
+                          <div >
+                            {arrayField(field, parameters)}
+                          </div>
+                          <div>                          
+                            <button
+                              className={styles.button + ' negative icon'}
+                              onClick={(e)=>{parameters.removeElement(e, key, index);e.preventDefault();}}>
+                                <i className="times icon"></i>
+                            </button>
+                          </div>
+                      </div>
+                    );
+                    parameters.stack.pop();
+                    return arrayComponent;
+                  })}
+                  <div style={{display:'grid', gridTemplateColumns: 'auto 36px', gridColumnGap: '5px'}}>
+                    <div/>
+                    <div>                          
+                      <button
+                        className={styles.button + ' positive icon'}
+                        onClick={(e)=>{parameters.addElement(e, key, defaultValue);e.preventDefault();}}>
+                          <i className="plus icon"></i>
+                      </button>
+                    </div>
+                  </div>
+                  
                 </fieldset>
-                <input type='button'
-                    className={styles.button}
-                    value='Add'
-                    onClick={(e)=>{parameters.addElement(e, key, defaultValue);}} />
             </div>);
     } else if (field.isPrimitive()) {
       if(field.getType() === 'Boolean'){

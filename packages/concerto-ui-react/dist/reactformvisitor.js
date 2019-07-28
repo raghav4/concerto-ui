@@ -211,26 +211,39 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
         parameters.stack.push(index);
 
         const arrayComponent = _react.default.createElement("div", {
+          style: {
+            display: 'grid',
+            gridTemplateColumns: 'auto 36px',
+            gridColumnGap: '5px'
+          },
           key: field.getName() + '_wrapper[' + index + ']'
-        }, arrayField(field, parameters), _react.default.createElement("input", {
-          type: "button",
-          className: styles.button,
-          value: "Delete",
+        }, _react.default.createElement("div", null, arrayField(field, parameters)), _react.default.createElement("div", null, _react.default.createElement("button", {
+          className: styles.button + ' negative icon',
           onClick: e => {
             parameters.removeElement(e, key, index);
+            e.preventDefault();
           }
-        }));
+        }, _react.default.createElement("i", {
+          className: "times icon"
+        }))));
 
         parameters.stack.pop();
         return arrayComponent;
-      })), _react.default.createElement("input", {
-        type: "button",
-        className: styles.button,
-        value: "Add",
+      }), _react.default.createElement("div", {
+        style: {
+          display: 'grid',
+          gridTemplateColumns: 'auto 36px',
+          gridColumnGap: '5px'
+        }
+      }, _react.default.createElement("div", null), _react.default.createElement("div", null, _react.default.createElement("button", {
+        className: styles.button + ' positive icon',
         onClick: e => {
           parameters.addElement(e, key, defaultValue);
+          e.preventDefault();
         }
-      }));
+      }, _react.default.createElement("i", {
+        className: "plus icon"
+      }))))));
     } else if (field.isPrimitive()) {
       if (field.getType() === 'Boolean') {
         component = _react.default.createElement("div", {

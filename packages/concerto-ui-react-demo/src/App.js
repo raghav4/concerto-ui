@@ -32,11 +32,16 @@ class App extends Component {
       types: [],
 
       // Source model file text
-      model: `namespace matt
+      model: `namespace concerto
 
-      concept foo {
-      
-      o String bar 
+      concept A {
+        o String[] strings 
+        o B[] bs
+      }
+
+      concept B {
+        o String string
+        o Double number
       }`,
 
       // Rendering options

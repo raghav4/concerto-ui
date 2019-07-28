@@ -63,6 +63,7 @@ class FormGenerator {
     */
     async loadFromText(texts) {
         this.loaded = false;
+        this.modelManager.clearModelFiles();
         try { 
             this.modelManager.addModelFiles(texts, new Array(texts.length));
         } catch (error){
