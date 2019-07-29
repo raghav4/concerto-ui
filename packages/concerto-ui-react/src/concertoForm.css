@@ -12,9 +12,29 @@
  * limitations under the License.
  */
 
-fieldset {
-    border-top:0px;
-    border-bottom:0px;
-    border-right:0px;
+.arrayElement, .classElement {
     border-left: 1px solid rgba(34,36,38,.15);
+    padding: 5px 5px 5px 10px
+}
+
+.grid {
+    display: grid;
+    grid-template-columns: auto 36px;
+    grid-column-gap: 5px;
+}
+
+.fullHeight {
+    height:100%
+}
+
+.monetaryAmount {
+    display: grid;
+    grid-template-columns: auto 60px;
+    grid-column-gap: 5px;
+}
+
+.duration {
+    display: grid;
+    grid-template-columns: auto 100px;
+    grid-column-gap: 5px;
 }

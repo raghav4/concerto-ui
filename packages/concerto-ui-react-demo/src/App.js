@@ -34,15 +34,23 @@ class App extends Component {
       // Source model file text
       model: `namespace concerto
 
-      concept A {
-        o String[] strings 
-        o B[] bs
-      }
+import org.accordproject.money.MonetaryAmount from https://models.accordproject.org/money@0.2.0.cto
+import org.accordproject.time.Duration from https://models.accordproject.org/time@0.2.0.cto
+import org.accordproject.time.Period from https://models.accordproject.org/time@0.2.0.cto
+  
+concept A {
+  o String[] strings 
+  o B[] bs
+  o MonetaryAmount[] monies
+  o MonetaryAmount money
+  o Duration duration
+  o Period period
+}
 
-      concept B {
-        o String string
-        o Double number
-      }`,
+concept B {
+  o String string
+  o Double number
+}`,
 
       // Rendering options
       options: {
@@ -52,6 +60,8 @@ class App extends Component {
         // 'sample' uses random well-typed values
         // 'empty' provides sensible empty values
         includeSampleData: 'sample', // or 'empty'
+
+        updateExternalModels: true,
       },
 
       error: null,
@@ -102,9 +112,10 @@ class App extends Component {
       </Tab.Pane>) },
     ];
 
-    const form = this.state.error
+    const form = this.state.warning
       ? (<Message>
         <p>An error occured</p>
+        <pre>{this.state.warning}</pre>
       </Message>)
       : <ConcertoForm
         ref={this.form}

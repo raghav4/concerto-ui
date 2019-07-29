@@ -49,7 +49,10 @@ class FormGenerator {
           o String eventId
         }`, 'org.accordproject.base.cto', false, true);
 
-        this.options = Object.assign({includeSampleData: 'empty' }, options);
+        this.options = Object.assign({
+            includeSampleData: 'empty',
+            updateExternalModels: false,
+        }, options);
 
         this.factory = new Factory(this.modelManager);
         this.serializer = new Serializer(this.factory, this.modelManager);
@@ -63,12 +66,17 @@ class FormGenerator {
     */
     async loadFromText(texts) {
         this.loaded = false;
+
         this.modelManager.clearModelFiles();
         try { 
-            this.modelManager.addModelFiles(texts, new Array(texts.length));
+            texts.forEach(text => this.modelManager.addModelFile(text, null, true));
+            if(this.options.updateExternalModels){
+                await this.modelManager.updateExternalModels();
+            }
+            this.modelManager.validateModelFiles();
         } catch (error){
-            console.error(error);
-            return [];
+            this.modelManager.clearModelFiles();
+            throw error;
         }
         this.loaded = true;
         return this.getTypes();

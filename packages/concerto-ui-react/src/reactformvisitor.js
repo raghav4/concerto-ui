@@ -40,40 +40,84 @@ class ReactFormVisitor extends HTMLFormVisitor {
     if(!classDeclaration.isSystemType() &&
         !classDeclaration.isAbstract()) {
       const id = classDeclaration.getName().toLowerCase();
+
+      const renderClassDeclaration = (classDeclaration, parameters) => {
+        if ([
+          'org.accordproject.money.MonetaryAmount',
+          'org.accordproject.money.DigitalMonetaryAmount',
+        ].includes(classDeclaration.getFullyQualifiedName())) {
+            return (
+              <div key={id} name={classDeclaration.getName()}>
+              {this.visitMonetaryAmount(classDeclaration, parameters)}
+              </div>
+            );
+        } else if ([
+          'org.accordproject.time.Duration',
+          'org.accordproject.time.Period'
+        ].includes(classDeclaration.getFullyQualifiedName())) {
+            return (
+              <div key={id} name={classDeclaration.getName()}>
+              {this.visitDuration(classDeclaration, parameters)}
+              </div>
+            );
+        }
+        return (
+          <div key={id} name={classDeclaration.getName()} className={parameters.customClasses.classElement} >
+          {classDeclaration.getProperties().map((property) => {
+            return property.accept(this,parameters);
+          })}
+          </div>
+        );
+      }
+
+      // Is this class in an array or not?
       if(parameters.stack.length === 0) {
         component = (<div key={id}>
                         <div name={classDeclaration.getName()}>
-
-                        {classDeclaration.getProperties().map((property) => {
-                          return property.accept(this,parameters);
-                        })}
+                        {renderClassDeclaration(classDeclaration, parameters)}
                         </div>
                     </div>
                     );
       } else {
-        component = (
-                <fieldset key={id}>
-                    <div name={classDeclaration.getName()}>
-
-                    {classDeclaration.getProperties().map((property) => {
-                      return property.accept(this,parameters);
-                    })}
-                    </div>
-                </fieldset>
-                );
+        component = renderClassDeclaration(classDeclaration, parameters);
       }
     }
     return component;
   }
 
+  visitMonetaryAmount(amountDeclaration, parameters) {
+    const props = amountDeclaration.getProperties();
+    parameters.skipLabel = true;
+    const component = ( 
+      <div className='monetaryAmount'>
+        <div>{props[0].accept(this, parameters)}</div>
+        <div>{props[1].accept(this, parameters)}</div>
+      </div>
+    );
+    parameters.skipLabel = false;
+    return component;
+  }
 
-    /**
-     * Visitor design pattern
-     * @param {EnumDeclaration} enumDeclaration - the object being visited
-     * @param {Object} parameters  - the parameter
-     * @return {Object} the result of visiting or null
-     * @private
-     */
+  visitDuration(amountDeclaration, parameters) {
+    const props = amountDeclaration.getProperties();
+    parameters.skipLabel = true;
+    const component = ( 
+      <div className='duration'>
+        <div>{props[0].accept(this, parameters)}</div>
+        <div>{props[1].accept(this, parameters)}</div>
+      </div>
+    );
+    parameters.skipLabel = false;
+    return component;
+  }
+
+  /**
+   * Visitor design pattern
+   * @param {EnumDeclaration} enumDeclaration - the object being visited
+   * @param {Object} parameters  - the parameter
+   * @return {Object} the result of visiting or null
+   * @private
+   */
   visitEnumDeclaration(enumDeclaration, parameters) {
     let component = null;
     const key = jsonpath.stringify(parameters.stack);
@@ -174,44 +218,41 @@ class ReactFormVisitor extends HTMLFormVisitor {
       }
 
       component = (<div className={style} key={field.getName()+'_wrapper'}>
-                <label>{Utilities.normalizeLabel(field.getName())}</label>
-                <fieldset>
-                  {value.map((element, index) => {
-                    parameters.stack.push(index);
-                    const arrayComponent = (
-                      <div style={{display:'grid', gridTemplateColumns: 'auto 36px', gridColumnGap: '5px'}} key={field.getName()+'_wrapper['+index+']'}>
-                          <div >
-                            {arrayField(field, parameters)}
-                          </div>
-                          <div>                          
-                            <button
-                              className={styles.button + ' negative icon'}
-                              onClick={(e)=>{parameters.removeElement(e, key, index);e.preventDefault();}}>
-                                <i className="times icon"></i>
-                            </button>
-                          </div>
+            { !parameters.skipLabel && <label>{Utilities.normalizeLabel(field.getName())}</label> }
+              {value.map((element, index) => {
+                parameters.stack.push(index);
+                const arrayComponent = (
+                  <div className={styles.arrayElement + ' grid'} key={field.getName()+'_wrapper['+index+']'}>
+                      <div >
+                        {arrayField(field, parameters)}
                       </div>
-                    );
-                    parameters.stack.pop();
-                    return arrayComponent;
-                  })}
-                  <div style={{display:'grid', gridTemplateColumns: 'auto 36px', gridColumnGap: '5px'}}>
-                    <div/>
-                    <div>                          
-                      <button
-                        className={styles.button + ' positive icon'}
-                        onClick={(e)=>{parameters.addElement(e, key, defaultValue);e.preventDefault();}}>
-                          <i className="plus icon"></i>
-                      </button>
-                    </div>
+                      <div>                          
+                        <button
+                          className={styles.button + ' negative icon'}
+                          onClick={(e)=>{parameters.removeElement(e, key, index);e.preventDefault();}}>
+                            <i className="times icon"></i>
+                        </button>
+                      </div>
                   </div>
-                  
-                </fieldset>
+                );
+                parameters.stack.pop();
+                return arrayComponent;
+              })}
+              <div className={styles.arrayElement + ' grid'}>
+                <div/>
+                <div>                          
+                  <button
+                    className={styles.button + ' positive icon'}
+                    onClick={(e)=>{parameters.addElement(e, key, defaultValue);e.preventDefault();}}>
+                      <i className="plus icon"></i>
+                  </button>
+                </div>
+              </div>
             </div>);
     } else if (field.isPrimitive()) {
       if(field.getType() === 'Boolean'){
         component = (<div className={style} key={field.getName()+'_wrapper'}>
-                  <label>{Utilities.normalizeLabel(field.getName())}</label>
+                  { !parameters.skipLabel && <label>{Utilities.normalizeLabel(field.getName())}</label> }
                   <div className={styles.boolean}>
                       <input type="checkbox"
                       checked={value}
@@ -223,7 +264,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
               </div>);
       } else if(this.toFieldType(field.getType()) === 'datetime-local'){
         component = (<div className={style} key={field.getName()+'_wrapper'}>
-                  <label>{Utilities.normalizeLabel(field.getName())}</label>
+                  { !parameters.skipLabel && <label>{Utilities.normalizeLabel(field.getName())}</label> }
                   <input type={this.toFieldType(field.getType())}
                       className={styles.input}
                       value={new Date(value).toDatetimeLocal()}
@@ -232,7 +273,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
               </div>);
       } else {
         component = (<div className={style} key={field.getName()+'_wrapper'}>
-                  <label>{Utilities.normalizeLabel(field.getName())}</label>
+                  { !parameters.skipLabel && <label>{Utilities.normalizeLabel(field.getName())}</label> }
                   <input type={this.toFieldType(field.getType())}
                       className={styles.input}
                       value={value}
@@ -244,7 +285,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
       let type = parameters.modelManager.getType(field.getFullyQualifiedTypeName());
       type = this.findConcreteSubclass(type);
       component = (<div className={style} key={field.getName()}>
-                <label>{Utilities.normalizeLabel(field.getName())}</label>
+                { !parameters.skipLabel && <label>{Utilities.normalizeLabel(field.getName())}</label> }
                 {type.accept(this, parameters)}
             </div>);
     }

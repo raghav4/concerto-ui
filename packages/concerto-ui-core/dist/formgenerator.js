@@ -59,7 +59,8 @@ class FormGenerator {
           o String eventId
         }`, 'org.accordproject.base.cto', false, true);
     this.options = Object.assign({
-      includeSampleData: 'empty'
+      includeSampleData: 'empty',
+      updateExternalModels: false
     }, options);
     this.factory = new _composerConcerto.Factory(this.modelManager);
     this.serializer = new _composerConcerto.Serializer(this.factory, this.modelManager);
@@ -77,10 +78,16 @@ class FormGenerator {
     this.modelManager.clearModelFiles();
 
     try {
-      this.modelManager.addModelFiles(texts, new Array(texts.length));
+      texts.forEach(text => this.modelManager.addModelFile(text, null, true));
+
+      if (this.options.updateExternalModels) {
+        await this.modelManager.updateExternalModels();
+      }
+
+      this.modelManager.validateModelFiles();
     } catch (error) {
-      console.error(error);
-      return [];
+      this.modelManager.clearModelFiles();
+      throw error;
     }
 
     this.loaded = true;

@@ -64,7 +64,9 @@ class ConcertoForm extends _react.Component {
         enumeration: 'ui fluid dropdown',
         required: 'ui required',
         boolean: 'ui toggle checkbox',
-        button: 'ui fluid button'
+        button: 'ui fluid button basic fullHeight',
+        arrayElement: 'arrayElement',
+        classElement: 'classElement'
       },
       onFieldValueChange: (e, key) => {
         this.onFieldValueChange(e, key);
@@ -101,8 +103,9 @@ class ConcertoForm extends _react.Component {
     try {
       types = await this.generator.loadFromText(files); // The model file was invalid
     } catch (error) {
-      // Set default values to avoid trying to render a bad model
+      console.error(error.message); // Set default values to avoid trying to render a bad model
       // Don't change the JSON, it might be valid once the model file is fixed
+
       return {
         types: []
       };

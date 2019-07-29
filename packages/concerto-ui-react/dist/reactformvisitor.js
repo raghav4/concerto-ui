@@ -51,25 +51,64 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
     if (!classDeclaration.isSystemType() && !classDeclaration.isAbstract()) {
       const id = classDeclaration.getName().toLowerCase();
 
+      const renderClassDeclaration = (classDeclaration, parameters) => {
+        if (['org.accordproject.money.MonetaryAmount', 'org.accordproject.money.DigitalMonetaryAmount'].includes(classDeclaration.getFullyQualifiedName())) {
+          return _react.default.createElement("div", {
+            key: id,
+            name: classDeclaration.getName()
+          }, this.visitMonetaryAmount(classDeclaration, parameters));
+        } else if (['org.accordproject.time.Duration', 'org.accordproject.time.Period'].includes(classDeclaration.getFullyQualifiedName())) {
+          return _react.default.createElement("div", {
+            key: id,
+            name: classDeclaration.getName()
+          }, this.visitDuration(classDeclaration, parameters));
+        }
+
+        return _react.default.createElement("div", {
+          key: id,
+          name: classDeclaration.getName(),
+          className: parameters.customClasses.classElement
+        }, classDeclaration.getProperties().map(property => {
+          return property.accept(this, parameters);
+        }));
+      }; // Is this class in an array or not?
+
+
       if (parameters.stack.length === 0) {
         component = _react.default.createElement("div", {
           key: id
         }, _react.default.createElement("div", {
           name: classDeclaration.getName()
-        }, classDeclaration.getProperties().map(property => {
-          return property.accept(this, parameters);
-        })));
+        }, renderClassDeclaration(classDeclaration, parameters)));
       } else {
-        component = _react.default.createElement("fieldset", {
-          key: id
-        }, _react.default.createElement("div", {
-          name: classDeclaration.getName()
-        }, classDeclaration.getProperties().map(property => {
-          return property.accept(this, parameters);
-        })));
+        component = renderClassDeclaration(classDeclaration, parameters);
       }
     }
 
+    return component;
+  }
+
+  visitMonetaryAmount(amountDeclaration, parameters) {
+    const props = amountDeclaration.getProperties();
+    parameters.skipLabel = true;
+
+    const component = _react.default.createElement("div", {
+      className: "monetaryAmount"
+    }, _react.default.createElement("div", null, props[0].accept(this, parameters)), _react.default.createElement("div", null, props[1].accept(this, parameters)));
+
+    parameters.skipLabel = false;
+    return component;
+  }
+
+  visitDuration(amountDeclaration, parameters) {
+    const props = amountDeclaration.getProperties();
+    parameters.skipLabel = true;
+
+    const component = _react.default.createElement("div", {
+      className: "duration"
+    }, _react.default.createElement("div", null, props[0].accept(this, parameters)), _react.default.createElement("div", null, props[1].accept(this, parameters)));
+
+    parameters.skipLabel = false;
     return component;
   }
   /**
@@ -207,15 +246,11 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
       component = _react.default.createElement("div", {
         className: style,
         key: field.getName() + '_wrapper'
-      }, _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("fieldset", null, value.map((element, index) => {
+      }, !parameters.skipLabel && _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), value.map((element, index) => {
         parameters.stack.push(index);
 
         const arrayComponent = _react.default.createElement("div", {
-          style: {
-            display: 'grid',
-            gridTemplateColumns: 'auto 36px',
-            gridColumnGap: '5px'
-          },
+          className: styles.arrayElement + ' grid',
           key: field.getName() + '_wrapper[' + index + ']'
         }, _react.default.createElement("div", null, arrayField(field, parameters)), _react.default.createElement("div", null, _react.default.createElement("button", {
           className: styles.button + ' negative icon',
@@ -230,11 +265,7 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
         parameters.stack.pop();
         return arrayComponent;
       }), _react.default.createElement("div", {
-        style: {
-          display: 'grid',
-          gridTemplateColumns: 'auto 36px',
-          gridColumnGap: '5px'
-        }
+        className: styles.arrayElement + ' grid'
       }, _react.default.createElement("div", null), _react.default.createElement("div", null, _react.default.createElement("button", {
         className: styles.button + ' positive icon',
         onClick: e => {
@@ -243,13 +274,13 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
         }
       }, _react.default.createElement("i", {
         className: "plus icon"
-      }))))));
+      })))));
     } else if (field.isPrimitive()) {
       if (field.getType() === 'Boolean') {
         component = _react.default.createElement("div", {
           className: style,
           key: field.getName() + '_wrapper'
-        }, _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("div", {
+        }, !parameters.skipLabel && _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("div", {
           className: styles.boolean
         }, _react.default.createElement("input", {
           type: "checkbox",
@@ -262,7 +293,7 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
         component = _react.default.createElement("div", {
           className: style,
           key: field.getName() + '_wrapper'
-        }, _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("input", {
+        }, !parameters.skipLabel && _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("input", {
           type: this.toFieldType(field.getType()),
           className: styles.input,
           value: new Date(value).toDatetimeLocal(),
@@ -273,7 +304,7 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
         component = _react.default.createElement("div", {
           className: style,
           key: field.getName() + '_wrapper'
-        }, _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("input", {
+        }, !parameters.skipLabel && _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), _react.default.createElement("input", {
           type: this.toFieldType(field.getType()),
           className: styles.input,
           value: value,
@@ -287,7 +318,7 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
       component = _react.default.createElement("div", {
         className: style,
         key: field.getName()
-      }, _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), type.accept(this, parameters));
+      }, !parameters.skipLabel && _react.default.createElement("label", null, _concertoUiCore.Utilities.normalizeLabel(field.getName())), type.accept(this, parameters));
     }
 
     parameters.stack.pop();
