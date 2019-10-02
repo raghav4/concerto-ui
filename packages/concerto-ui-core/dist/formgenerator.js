@@ -154,10 +154,6 @@ class FormGenerator {
     if (this.loaded) {
       const classDeclaration = this.modelManager.getType(type);
 
-      if (!classDeclaration) {
-        throw new Error(type + ' not found');
-      }
-
       if (classDeclaration.isEnum()) {
         throw new Error('Cannot generate JSON for an enumerated type directly, the type should be contained in Concept, Asset, Transaction or Event declaration');
       }

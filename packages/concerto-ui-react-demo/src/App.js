@@ -78,7 +78,12 @@ concept B {
   }
 
   handleJsonTextAreaChange(event) {
-    this.setState({json: JSON.parse(event.target.value)});
+    try {
+      this.setState({json: JSON.parse(event.target.value)});
+    }
+    catch(err) {
+      // invalid JSON
+    }
   }
 
   handleModelTextAreaChange(event) {
@@ -130,7 +135,7 @@ concept B {
     return (
       <div className="App container ui form">
         <h2>Concerto Form Generator - Demo Client</h2>
-        <p>This tool demonstrates the <em>concerto-ui</em> library to generate a form from a Hyperledger Composer, Concerto model.</p>
+        <p>This tool demonstrates the <em>concerto-ui</em> library to generate a form from an Accord Project Concerto model.</p>
         <p>This demo produces a ReactJS form that is styled with Semantic UI.</p>
         <Tab panes={panes} />
         <p>Choose a type from this dropdown to generate a form</p>
@@ -154,10 +159,10 @@ concept B {
         <div className="ui segment">
           <h2>JSON</h2>
           <div className='ui form field'>
-          <textarea
-            value={JSON.stringify(this.state.json, null, 2)}
-            onChange={this.handleJsonTextAreaChange.bind(this)}
-          />
+            <textarea
+              value={JSON.stringify(this.state.json, null, 2)}
+              onChange={this.handleJsonTextAreaChange.bind(this)}
+            />
           </div>
         </div>
       </div>
