@@ -100,12 +100,17 @@ class ConcertoForm extends Component {
       return { types: [] };
     }
 
-    if(!types.map(t => t.getFullyQualifiedName()).includes(this.props.type)){
-      fqn = types[0].getFullyQualifiedName();
-      json = this.generateJSON(fqn);
-      return { types, json, fqn };
+    try {
+      if(!types.map(t => t.getFullyQualifiedName()).includes(this.props.type)){
+        fqn = types[0].getFullyQualifiedName();
+        json = this.generateJSON(fqn);
+        return { types, json, fqn };
+      }
+      json = this.generateJSON(this.props.type);  
     }
-    json = this.generateJSON(this.props.type);
+    catch(err) {
+      console.log(err);
+    }
     return { types, json };
   }
 
@@ -134,12 +139,18 @@ class ConcertoForm extends Component {
   }
 
   generateJSON(type){
-    // The type changed so we have to generate a new instance
-    if(this.props.json && !this.isInstanceOf(this.props.json, type)) {
-      return this.generator.generateJSON(type);
-    // The instance is null so we have to create a new instance
-    } else if(!this.props.json) {
-      return this.generator.generateJSON(type);
+
+    try {
+      // The type changed so we have to generate a new instance
+      if(this.props.json && !this.isInstanceOf(this.props.json, type)) {
+        return this.generator.generateJSON(type);
+      // The instance is null so we have to create a new instance
+      } else if(!this.props.json) {
+        return this.generator.generateJSON(type);
+      }
+    }
+    catch(err) {
+      console.log(err);
     }
     // Otherwise, just use what we already have
     return this.props.json;
@@ -153,7 +164,12 @@ class ConcertoForm extends Component {
 
   renderForm(){
     if (this.props.type && this.state.value) {
-      return this.generator.generateHTML(this.props.type, this.state.value);
+      try {
+        return this.generator.generateHTML(this.props.type, this.state.value);
+      }
+      catch(err) {
+        return null;
+      }
     }
     return null;
   }

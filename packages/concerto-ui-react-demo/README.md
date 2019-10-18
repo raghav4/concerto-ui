@@ -1,10 +1,10 @@
-# React App Hyperledger Composer Modelling Tools 
+# React App Accord Project Concerto Modelling Tools 
 
 [![Coverage Status](https://coveralls.io/repos/github/uchibeke/composer-form/badge.svg?branch=master)](https://coveralls.io/github/uchibeke/composer-form?branch=master)
 
 [![Build Status](https://travis-ci.com/uchibeke/composer-form.svg?branch=master)](https://travis-ci.com/uchibeke/composer-form)
 
-The Hyperledger Composer modelling language is used by both Hyperledger Composer and Accord Project Cicero as an object-oriented data description (schema) language, based on a textual domain-specific language. Both communities would benefit from improved tooling for the modelling language, including the ability to generate UML style diagrams and web-forms from class descriptions described using the Hyperledger Composer modelling language.
+The Accord Project Concerto modelling language is used as an object-oriented data description (schema) language, based on a textual domain-specific language.
 
 ## Get started
 

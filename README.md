@@ -1,15 +1,11 @@
 # Concerto UI Library
 
-This library providers web UI components for models written in the [Concerto Modelling Language](https://github.com/hyperledger/composer-concerto).
+This library providers web UI components for models written in the [Concerto Modelling Language](https://github.com/accordproject/concerto).
 
 [![Coverage Status](https://coveralls.io/repos/github/accordproject/concerto-ui/badge.svg?branch=master)](https://coveralls.io/github/accordproject/concerto-ui?branch=master) [![GitHub license](https://img.shields.io/github/license/accordproject/concerto-ui)](https://github.com/accordproject/concerto-ui/blob/master/LICENSE) [![join slack](https://img.shields.io/badge/Accord%20Project-Join%20Slack-blue)](https://accord-project-slack-signup.herokuapp.com/) [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 [![Build Status](https://travis-ci.org/accordproject/concerto-ui.svg?branch=master)](https://travis-ci.org/accordproject/concerto-ui)
 
-The Concerto Modelling Language is used by both Hyperledger Composer and Accord Project Cicero as an object-oriented data description (schema) language, based on a textual domain-specific language. Both communities would benefit from improved tooling for the modelling language, including the ability to generate UML style diagrams and web-forms from class descriptions described using the Hyperledger Composer modelling language.
-
-## Web Form Generator
-
-A web-form generated from model types would allow transactions to be submitted (or assets/participants created) by filling out a web-form, as opposed to submitting JSON formatted text, easing ease of use and guiding the user. The web form generator dynamically creates form elements based on a root type from a Concerto model. Some simplifying assumptions are made to solve the issue of data-binding from arbitrarily complex object models to web forms. The generated web form generator is an embeddable, modular, component that can be easily embedded in web-based tools, such as Hyperledger Composer Playground, or similar.
+The Concerto Modelling Language is an object-oriented data description (schema) language, based on a textual domain-specific language.
 
 ## How this project is structured
 
@@ -20,14 +16,13 @@ Packages:
 
 ### More Information
 
-Concerto Modeling Language | https://github.com/hyperledger/composer-concerto
+Concerto Modeling Language | https://github.com/accordproject/concerto
 
 ## What does this do
 
 - **Web-form Generator:** A functional dynamic web component, that generates a web-form based on the fully-qualified name of a type from a Concerto Model. A sample web application that shows the dynamic web component in action.
 
-- Ask a question on [Stack Overflow](http://stackoverflow.com/questions/tagged/hyperledger-composer)
-- Chat on the Rocket.Chat [discussion channels](https://chat.hyperledger.org/channel/composer)
+- Ask a question on [Stack Overflow](http://stackoverflow.com/questions/tagged/accordproject)
 
 ## Getting started
 
