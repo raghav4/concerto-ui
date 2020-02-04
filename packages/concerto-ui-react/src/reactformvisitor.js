@@ -98,6 +98,14 @@ class ReactFormVisitor extends HTMLFormVisitor {
               {this.visitDuration(classDeclaration, parameters)}
               </div>
             );
+        } else if ([
+          'org.accordproject.cicero.contract.AccordParty',
+        ].includes(classDeclaration.getFullyQualifiedName())) {
+            return (
+              <div key={id} name={classDeclaration.getName()}>
+              {this.flattenSingletonChild(classDeclaration, parameters)}
+              </div>
+            );
         }
         return (
           <div key={id} name={classDeclaration.getName()} className={parameters.customClasses.classElement} >
@@ -145,6 +153,14 @@ class ReactFormVisitor extends HTMLFormVisitor {
         <div>{props[1].accept(this, parameters)}</div>
       </div>
     );
+    parameters.skipLabel = false;
+    return component;
+  }
+
+  flattenSingletonChild(declaration, parameters) {
+    const props = declaration.getProperties();
+    parameters.skipLabel = true;
+    const component = <div>{props[0].accept(this, parameters)}</div>;
     parameters.skipLabel = false;
     return component;
   }
@@ -375,6 +391,7 @@ class ReactFormVisitor extends HTMLFormVisitor {
 
     let component;
     if (relationship.isArray()){
+      if(!value){ return null; }
       let arrayField = (field, parameters) => {
         let key = jsonpath.stringify(parameters.stack);
         let value = jsonpath.value(parameters.json,key);

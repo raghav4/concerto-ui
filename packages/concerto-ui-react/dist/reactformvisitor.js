@@ -102,6 +102,11 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
             key: id,
             name: classDeclaration.getName()
           }, this.visitDuration(classDeclaration, parameters));
+        } else if (['org.accordproject.cicero.contract.AccordParty'].includes(classDeclaration.getFullyQualifiedName())) {
+          return _react.default.createElement("div", {
+            key: id,
+            name: classDeclaration.getName()
+          }, this.flattenSingletonChild(classDeclaration, parameters));
         }
 
         return _react.default.createElement("div", {
@@ -147,6 +152,16 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
     const component = _react.default.createElement("div", {
       className: "duration"
     }, _react.default.createElement("div", null, props[0].accept(this, parameters)), _react.default.createElement("div", null, props[1].accept(this, parameters)));
+
+    parameters.skipLabel = false;
+    return component;
+  }
+
+  flattenSingletonChild(declaration, parameters) {
+    const props = declaration.getProperties();
+    parameters.skipLabel = true;
+
+    const component = _react.default.createElement("div", null, props[0].accept(this, parameters));
 
     parameters.skipLabel = false;
     return component;
@@ -420,6 +435,10 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
     let component;
 
     if (relationship.isArray()) {
+      if (!value) {
+        return null;
+      }
+
       let arrayField = (field, parameters) => {
         let key = _jsonpath.default.stringify(parameters.stack);
 

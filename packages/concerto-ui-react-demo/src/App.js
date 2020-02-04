@@ -90,7 +90,7 @@ class App extends Component {
           'org.accordproject.cicero.contract.AccordContract.contractId',
           'org.accordproject.cicero.contract.AccordClause.clauseId',
           'org.accordproject.cicero.contract.AccordContractState.stateId',
-          property => property.getName() === 'parties'
+          // property => property.getName() === 'parties'
         ],
       },
 
