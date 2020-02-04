@@ -39,14 +39,54 @@ function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { de
  */
 class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
   /**
+   * Helper function to determine whether to hide a property from the rendering
+   * @param {Property} property - the object being visited, either a field or a resource
+   * @param {Object} parameters  - the parameter
+   * @return {boolean} - true if the property should be hidden, false otherwise
+   * @private
+   */
+  hideProperty(property, parameters) {
+    if (parameters.hiddenFields.find(f => {
+      if (typeof f === 'function') {
+        return f(property);
+      }
+
+      if (typeof f === 'string') {
+        return f === property.getFullyQualifiedName();
+      }
+
+      return false;
+    })) {
+      parameters.stack.pop();
+      return true;
+    }
+
+    return false;
+  }
+  /**
    * Visitor design pattern
    * @param {ClassDeclaration} classDeclaration - the object being visited
    * @param {Object} parameters  - the parameter
    * @return {Object} the result of visiting or null
    * @private
    */
+
+
   visitClassDeclaration(classDeclaration, parameters) {
     let component = null;
+
+    if (parameters.hideIdentifiers) {
+      if (!parameters.hiddenFields) {
+        parameters.hiddenFields = [];
+      }
+
+      const idFieldName = classDeclaration.getIdentifierFieldName();
+
+      if (idFieldName) {
+        const idField = classDeclaration.getProperty(idFieldName);
+        parameters.hiddenFields.push(idField.getFullyQualifiedName());
+      }
+    }
 
     if (!classDeclaration.isSystemType() && !classDeclaration.isAbstract()) {
       const id = classDeclaration.getName().toLowerCase();
@@ -153,6 +193,12 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
 
   visitField(field, parameters) {
     parameters.stack.push(field.getName());
+
+    if (this.hideProperty(field, parameters)) {
+      return null;
+    }
+
+    ;
 
     let key = _jsonpath.default.stringify(parameters.stack);
 
@@ -350,6 +396,12 @@ class ReactFormVisitor extends _concertoUiCore.HTMLFormVisitor {
 
   visitRelationship(relationship, parameters) {
     parameters.stack.push(relationship.getName());
+
+    if (this.hideProperty(relationship, parameters)) {
+      return null;
+    }
+
+    ;
     const styles = parameters.customClasses;
     let fieldStyle = styles.field;
 
