@@ -12,7 +12,7 @@
 * limitations under the License.
 */
 
-import { ModelManager, Factory, Serializer } from 'composer-concerto';
+import { ModelManager, Factory, Serializer } from '@accordproject/concerto-core';
 import HTMLFormVisitor from './htmlformvisitor';
 
 /**

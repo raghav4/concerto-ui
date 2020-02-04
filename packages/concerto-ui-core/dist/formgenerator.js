@@ -5,7 +5,7 @@ Object.defineProperty(exports, "__esModule", {
 });
 exports.default = void 0;
 
-var _composerConcerto = require("composer-concerto");
+var _concertoCore = require("@accordproject/concerto-core");
 
 var _htmlformvisitor = _interopRequireDefault(require("./htmlformvisitor"));
 
@@ -47,7 +47,7 @@ class FormGenerator {
   * @param {ModelManager} options.modelManager - An optional custom model manager
   */
   constructor(options) {
-    this.modelManager = new _composerConcerto.ModelManager(); // TODO Refactor this to an option to make this independent of Cicero
+    this.modelManager = new _concertoCore.ModelManager(); // TODO Refactor this to an option to make this independent of Cicero
 
     this.modelManager.addModelFile(`namespace org.accordproject.base
         abstract asset Asset {  }
@@ -62,8 +62,8 @@ class FormGenerator {
       includeSampleData: 'empty',
       updateExternalModels: false
     }, options);
-    this.factory = new _composerConcerto.Factory(this.modelManager);
-    this.serializer = new _composerConcerto.Serializer(this.factory, this.modelManager);
+    this.factory = new _concertoCore.Factory(this.modelManager);
+    this.serializer = new _concertoCore.Serializer(this.factory, this.modelManager);
     this.loaded = false;
   }
   /**
