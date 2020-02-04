@@ -22,9 +22,9 @@ const {
     RelationshipDeclaration,
     EnumDeclaration,
     EnumValueDeclaration,
-} = require('composer-concerto');
+} = require('@accordproject/concerto-core');
 const util = require('util');
-const Writer = require('composer-concerto').Writer;
+const Writer = require('@accordproject/concerto-core').Writer;
 
 /**
  * Convert the contents of a ModelManager to TypeScript code.
