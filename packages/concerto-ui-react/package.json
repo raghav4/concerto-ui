@@ -1,8 +1,8 @@
 {
   "name": "@accordproject/concerto-ui-react",
-  "version": "0.82.9",
+  "version": "0.83.0",
   "dependencies": {
-    "@accordproject/concerto-ui-core": "0.82.9",
+    "@accordproject/concerto-ui-core": "0.83.0",
     "jsonpath": "1.0.1",
     "lodash.isequal": "^4.5.0"
   },
