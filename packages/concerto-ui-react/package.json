@@ -9,7 +9,7 @@
   "scripts": {
     "build": "rm -rf dist && NODE_ENV=production babel src --out-dir dist --copy-files --ignore '**/*.spec.js,**/*.test.js,samples,__snapshots__,**/*.stories.js'",
     "watch": "npm run build -- --watch",
-    "test": "jest --coverage --verbose --color",
+    "test": "env TZ='Europe/Amsterdam' jest --coverage --verbose --color",
     "pretest": "npm run licchk",
     "licchk": "license-check-and-add",
     "prepublishOnly": "npm run build"
