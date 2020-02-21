@@ -13,6 +13,8 @@
 #
 
 coverage
+build
+dist
 node_modules
 out
 src/**/*.js

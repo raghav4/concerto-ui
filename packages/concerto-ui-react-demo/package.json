@@ -97,6 +97,7 @@
       "public",
       "config",
       ".babelrc",
+      "build",
       "dist"
     ],
     "file_type_method": "EXCLUDE",

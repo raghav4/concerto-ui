@@ -4,9 +4,7 @@ module.exports = {
     ],
     "env": {
       "test": {
-        "plugins": [
-          "@babel/preset-react"
-        ]
+        "plugins": []
       }
     }
   };
