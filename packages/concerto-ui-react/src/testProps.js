@@ -84,7 +84,7 @@ export const json = {
     'n': 'ONE',
     'ref': 'resource:org.hyperledger.concerto.form.test.MyAsset#2256'
   };
-
+export const readOnly = true;
 export const props = {
-    model, type, json, options
+    models: [model], type, json, options, readOnly
 };

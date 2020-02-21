@@ -33,10 +33,11 @@ describe('formgenerator Tests', function () {
                     label: 'control-label'
                 },
                 wrapHtmlForm: true,
+                updateExternalModels: true,
             };
             const generator = new Generator(options);
             expect(generator).not.toBeNull();
-            await generator.loadFromText(text);
+            await generator.loadFromText([text]);
 
             expect(generator.getTypes()).toHaveLength(11);
 

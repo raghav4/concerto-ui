@@ -29,7 +29,7 @@ Concerto Modeling Language | https://github.com/accordproject/concerto
 If not already installed, install lerna
 
 ```
-npm i -g lerna
+npm install -g lerna
 ```
 
 Install all of the project's dependencies and build each of the components
@@ -44,6 +44,8 @@ Run the demo app and experiment with the form generator
 ```
 npm run demo:react
 ```
+
+Open [http://localhost:8080](http://localhost:8080) to view it in the browser.
 
 ---
 

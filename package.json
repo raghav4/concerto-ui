@@ -1,44 +1,48 @@
 {
-	"name": "@accordproject/concerto-ui",
-	"private": true,
-	"workspaces": [
-		"packages/*"
-	],
-	"devDependencies": {
-		"@babel/cli": "^7.4",
-		"@babel/core": "^7.4",
-		"@babel/preset-env": "^7.4",
-		"@babel/preset-react": "^7.0.0",
-		"babel-core": "^7.0.0-bridge.0",
-		"babel-jest": "^23.6.0",
-		"babel-loader": "^8.0.5",
-		"babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
-		"enzyme": "^3.7.0",
-		"enzyme-adapter-react-16": "^1.6.0",
-		"jest": "^23.6.0",
-		"lerna": "^3.13.1",
-		"react": "^16.6.0",
-		"react-dom": "^16.6.0",
-		"react-test-renderer": "^16.6.0"
-	},
-	"scripts": {
-		"install": "npm run bootstrap",
-		"repoclean": "lerna clean",
-		"bootstrap": "lerna bootstrap",
-		"test": "lerna run test",
-		"build": "lerna exec -- npm run build",
-		"demo:react": "cd packages/concerto-ui-react-demo && npm run start"
-	},
-	"repository": {
-		"type": "git",
-		"url": "https://github.com/accordproject/concerto-ui.git"
-	},
-	"keywords": [
-		"blockchain",
-		"hyperledger",
-		"solutions"
-	],
-	"author": "Matt Roberts",
-	"license": "Apache-2.0",
-	"dependencies": {}
+  "name": "@accordproject/concerto-ui",
+  "workspaces": [
+    "packages/*"
+  ],
+  "devDependencies": {
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/plugin-proposal-class-properties": "^7.7.0",
+    "@babel/plugin-transform-modules-commonjs": "^7.7.0",
+    "@babel/plugin-transform-runtime": "^7.5.5",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-react": "^7.7.0",
+    "babel-eslint": "^10.0.2",
+    "babel-loader": "^8.0.6",
+    "babel-plugin-transform-es2015-modules-commonjs": "^6.26.2",
+    "enzyme": "^3.10.0",
+    "enzyme-adapter-react-16": "^1.15.1",
+    "jest": "^24.8.0",
+    "react": "^16.11.0",
+    "react-dom": "^16.11.0"
+  },
+  "scripts": {
+    "install": "npm run bootstrap",
+    "repoclean": "lerna clean",
+    "bootstrap": "lerna bootstrap",
+    "test": "lerna run test",
+    "build": "lerna exec -- npm run build",
+    "demo:react": "cd packages/concerto-ui-react-demo && npm run start",
+    "pkgcheck": "node ./scripts/pkgcheck.js",
+    "pkgstamp": "node ./scripts/pkgstamp.js",
+    "pkgbump": "node ./scripts/pkgbump.js && node ./scripts/pkgcheck.js --fix",
+    "pkgset": "node ./scripts/pkgset.js",
+    "depcheck": "node ./scripts/depcheck.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/accordproject/concerto-ui.git"
+  },
+  "keywords": [
+    "blockchain",
+    "hyperledger",
+    "solutions"
+  ],
+  "author": "Matt Roberts",
+  "license": "Apache-2.0",
+  "dependencies": {}
 }
