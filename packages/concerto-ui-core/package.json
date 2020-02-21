@@ -16,12 +16,15 @@
     "extends": "react-app"
   },
   "devDependencies": {
-    "@babel/cli": "7.4.3",
-    "@babel/core": "7.4.3",
-    "@babel/preset-env": "^7.6.0",
-    "babel-jest": "24.7.1",
-    "jest": "24.7.1",
-    "license-check-and-add": "2.3.1"
+    "@babel/cli": "^7.7.0",
+    "@babel/core": "^7.7.0",
+    "@babel/preset-env": "^7.7.1",
+    "@babel/preset-react": "^7.7.0",
+    "babel-core": "7.0.0-bridge.0",
+    "babel-preset-env": "1.7.0",
+    "babel-jest": "^24.8.0",
+    "jest": "^24.8.0",
+    "license-check-and-add": "2.3.6"
   },
   "main": "dist/index.js",
   "module": "dist/index.js",
