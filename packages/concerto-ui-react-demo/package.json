@@ -131,7 +131,6 @@
       "lib/acl/parser.js",
       "lib/query/parser.js",
       "out/**",
-      "scripts/**",
       "systest/**",
       "test/**"
     ],
