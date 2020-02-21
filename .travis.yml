@@ -1,36 +1,29 @@
 language: node_js
 node_js:
-    - '8'
-matrix:
-    include:
-        - env: DOCS=full FC_TASK=docs
+  - '10'
 dist: trusty
-addons:
 before_install: |
-    set -ev
-    date
+  set -e
+  export PATH="./$HOME/node_modules/.bin:$PATH"
+  npm install -g @alrra/travis-scripts
+  date
 install: |
-    set -ev
-    date
-before_script: |
-    npm install -g lerna
-    npm install -g eslint
-    lerna bootstrap
-script: |
-    lerna run test
-after_failure: |
-    tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
-after_success: |
-    lerna run coverage
-sudo: required
-notifications:
-  pushover:
-    api_key: ayq7zvsxc641sfna65njkik1x9y25b
-  webhooks:
-    urls:
-      - https://chat.hyperledger.org/hooks/BG3PeSerMSWRDSceE/GPCnCSqxMoyfqaTvLePSGudWjoCBwAcCT6bAKYRjK2sKSCM9
-    on_success: never # default: always
-    on_failure: never # default: always
-    on_start: never   # default: never
-    on_cancel: never # default: always
-    on_error: never # default: always
+  set -e
+  date
+  npm install -g lerna@^3.15.0
+  lerna bootstrap 2>&1
+  date
+script: lerna run test
+deploy:
+  provider: script
+  script: 'if [ "$TRAVIS_PULL_REQUEST" = "false" ]; then bash ./.travis/deploy.sh; fi'
+  skip_cleanup: true
+  on:
+    all_branches: true
+    repo: accordproject/concerto-ui
+    condition: "$TRAVIS_OS_NAME = linux"
+after_failure: tail -n +1 -- /home/travis/.npm/_logs/*-debug.log
+after_success: 
+cache:
+  directories:
+  - node_modules

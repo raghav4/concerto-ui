@@ -6,7 +6,6 @@
     "node": ">=8",
     "npm": ">=5"
   },
-  "private": true,
   "dependencies": {
     "@accordproject/concerto-ui-react": "0.82.9",
     "@babel/cli": "^7.7.0",
